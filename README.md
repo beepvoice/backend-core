@@ -12,6 +12,15 @@ migrate -database cockroach://root@localhost:26257/core?sslmode=disable -source 
 go build && ./core
 ```
 
+## Flags
+
+Flags are supplied to the compiled go program in the form ```-flag=stuff```.
+
+| Flag | Description | Default |
+| ---- | ----------- | ------- |
+| listen | Port number to listen on | 8080 |
+| postgres | URL of Postgres | postgresql://root@localhost:26257/core?sslmode=disable |
+
 ## API
 
 Unless otherwise noted, bodies and responses are with ```Content-Type: application/json```.
