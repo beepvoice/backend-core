@@ -405,7 +405,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 	// Select
 	rows, err := h.db.Query(`
 		SELECT "user".id, "user".first_name, "user".last_name, "user".phone_number FROM "user"
-		INNER JOIN member m ON "user".id = m.user
+		INNER JOIN member m ON "user".id = m.user AND "user".id != $1
 		INNER JOIN conversation ON "conversation".id = m.conversation
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2

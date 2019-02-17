@@ -389,7 +389,8 @@ List of user objects in conversation.
   {
     "id": "<id>",
     "first_name": "<first_name>",
-    "last_name": "<last_name>"
+    "last_name": "<last_name>",
+    "phone_number": "<phone_number>"
   },
   ...
 ]
