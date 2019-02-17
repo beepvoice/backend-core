@@ -404,7 +404,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT "user".id, "user".first_name, "user".last_name FROM "user"
+		SELECT "user".id, "user".first_name, "user".last_name, "user".phone_number FROM "user"
 		INNER JOIN member m ON "user".id = m.user
 		INNER JOIN conversation ON "conversation".id = m.conversation
 		INNER JOIN member
@@ -419,13 +419,13 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 
 	// Scan
 	for rows.Next() {
-		var id, firstName, lastName string
-		if err := rows.Scan(&id, &firstName, &lastName); err != nil {
+		var id, firstName, lastName, phoneNumber string
+		if err := rows.Scan(&id, &firstName, &lastName, &phoneNumber); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		users = append(users, User{ID: id, FirstName: firstName, LastName: lastName})
+		users = append(users, User{ID: id, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
 	}
 
 	// Respond
