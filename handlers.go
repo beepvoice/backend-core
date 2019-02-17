@@ -433,10 +433,13 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 	json.NewEncoder(w).Encode(users)
 }
 
+type PhoneNumber struct {
+	PhoneNumber string `json:"phone_number"`
+}
 func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
 	userID := p.ByName("user")
-	contact := User{}
+	contact := PhoneNumber{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&contact)
 	if err != nil {
@@ -445,15 +448,33 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	}
 
 	// Validate
-	if len(contact.ID) < 1 || contact.ID == userID {
+	if len(contact.PhoneNumber) < 1 {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	// Generate ID (just in case)
+	id := "u-" + RandomHex()
+
+	// Create contact if not exists, returning the id regardless
+	var contactId string
+	err = h.db.QueryRow(`
+		INSERT INTO "user" (id, first_name, last_name, phone_number)
+			VALUES ($1, '', '', $2)
+			ON CONFLICT(phone_number)
+			DO UPDATE SET phone_number=EXCLUDED.phone_number
+			RETURNING id
+	`, id, contact.PhoneNumber).Scan(&contactId)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Print(err)
 		return
 	}
 
 	// Insert
 	_, err = h.db.Exec(`
 		INSERT INTO contact ("user", contact) VALUES ($1, $2)
-	`, userID, contact.ID)
+	`, userID, contactId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
@@ -461,6 +482,7 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	}
 
 	// Respond
+	w.WriteHeader(200)
 	//w.Header().Set("Content-Type", "application/json")
 	//json.NewEncoder(w).Encode(contact)
 }

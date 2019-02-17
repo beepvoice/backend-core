@@ -421,7 +421,7 @@ Add a new contact for the specified user.
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| id | String | New contact's ID. | ✓ |
+| phone_number | String | New contact's phone number. A blank user object will be created if no such ID exists in the database. | ✓ |
 
 #### Success Response (200 OK)
 
