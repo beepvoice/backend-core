@@ -448,7 +448,8 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	}
 
 	// Validate
-	if len(contact.PhoneNumber) < 1 {
+	phone, err := ParsePhone(contact.PhoneNumber)
+	if err != nil || len(contact.PhoneNumber) < 1 {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -464,7 +465,7 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 			ON CONFLICT(phone_number)
 			DO UPDATE SET phone_number=EXCLUDED.phone_number
 			RETURNING id
-	`, id, contact.PhoneNumber).Scan(&contactId)
+	`, id, phone).Scan(&contactId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
