@@ -2,10 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
 	_ "github.com/lib/pq"
 )
@@ -14,10 +15,13 @@ var listen string
 var postgres string
 
 func main() {
-	// Parse flags
-	flag.StringVar(&listen, "listen", ":8080", "host and port to listen on")
-	flag.StringVar(&postgres, "postgres", "postgresql://root@localhost:26257/core?sslmode=disable", "postgres string")
-	flag.Parse()
+	// Load .env
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file")
+  }
+  listen = os.Getenv("LISTEN")
+  postgres = os.Getenv("POSTGRES")
 
 	// Open postgres
 	log.Printf("connecting to postgres %s", postgres)

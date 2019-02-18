@@ -12,14 +12,14 @@ migrate -database cockroach://root@localhost:26257/core?sslmode=disable -source 
 go build && ./core
 ```
 
-## Flags
+## Environment variables
 
-Flags are supplied to the compiled go program in the form ```-flag=stuff```.
+Supply environment variables by either exporting them or editing ```.env```.
 
-| Flag | Description | Default |
+| ENV | Description | Default |
 | ---- | ----------- | ------- |
-| listen | Port number to listen on | 8080 |
-| postgres | URL of Postgres | postgresql://root@localhost:26257/core?sslmode=disable |
+| LISTEN | Host and port number to listen on | :8080 |
+| POSTGRES | URL of Postgres | postgresql://root@localhost:26257/core?sslmode=disable |
 
 ## API
 
