@@ -122,7 +122,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 
 func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversation := Conversation{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&conversation)
@@ -175,7 +175,7 @@ func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p h
 
 func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 
 	// Response object
 	conversations := make([]Conversation, 0)
@@ -211,7 +211,7 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 
 	// Response object
@@ -241,7 +241,7 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 
 func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 	conversation := Conversation{}
 	decoder := json.NewDecoder(r.Body)
@@ -286,7 +286,7 @@ func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p h
 }
 
 func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 
 	// Delete
@@ -342,7 +342,7 @@ func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p h
 
 func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 	member := User{}
 	decoder := json.NewDecoder(r.Body)
@@ -396,7 +396,7 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 
 func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 
 	// Response object
@@ -438,7 +438,7 @@ type PhoneNumber struct {
 }
 func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 	contact := PhoneNumber{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&contact)
@@ -490,7 +490,7 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 
 func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := p.ByName("user")
+	userID := r.Context().Value("user").(string)
 
 	// Response object
 	contacts := make([]User, 0)

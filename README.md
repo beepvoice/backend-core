@@ -23,7 +23,7 @@ Supply environment variables by either exporting them or editing ```.env```.
 
 ## API
 
-Unless otherwise noted, bodies and responses are with ```Content-Type: application/json```.
+Unless otherwise noted, bodies and responses are with `Content-Type: application/json`. Endpoints marked with a `*` require a populated `X-User-Claim` header from `backend-auth`.
 
 | Contents |
 | -------- |
@@ -122,7 +122,7 @@ List of users.
 ### Get User
 
 ```
-GET /user/:user
+GET /user/id/:user
 ```
 
 Get a specific user by ID.
@@ -155,19 +155,13 @@ User object.
 
 ---
 
-### Create Conversation
+### Create Conversation*
 
 ```
-POST /user/:user/conversation
+POST /user/conversation
 ```
 
 Create a new conversation for a user.
-
-#### URL Params
-
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 
 #### Body
 
@@ -190,16 +184,16 @@ Conversation object.
 
 | Code | Description |
 | ---- | ----------- |
-| 400 | Error occurred parsing the supplied body. |
+| 400 | Error occurred parsing the supplied body/Invalid `X-User-Claim` header |
 | 404 | User with supplied ID could not be found in database. |
 | 500 | Error occurred inserting entries into the database. |
 
 ---
 
-### Delete Conversation
+### Delete Conversation*
 
 ```
-DELETE /user/:user/conversation/:conversation
+DELETE /user/conversation/:conversation
 ```
 
 Delete the specified conversation.
@@ -208,7 +202,6 @@ Delete the specified conversation.
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 | conversation | String | Conversation's ID. | ✓ |
 
 #### Success Response (200 OK)
@@ -219,15 +212,16 @@ Empty body.
 
 | Code | Description |
 | ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
 | 404 | User/Conversation with supplied ID could not be found in database. |
 | 500 | Error occurred deleting entries from the database. |
 
 ---
 
-### Update Conversation
+### Update Conversation*
 
 ```
-PATCH /user/:user/conversation/:conversation
+PATCH /user/conversation/:conversation
 ```
 
 Update a conversation's details (mainly just title for now).
@@ -236,7 +230,6 @@ Update a conversation's details (mainly just title for now).
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 | conversation | String | Conversation's ID. | ✓ |
 
 #### Body
@@ -253,25 +246,19 @@ Empty Body. (TODO: Updated conversation)
 
 | Code | Description |
 | ---- | ----------- |
-| 400 | Error occurred parsing the supplied body. |
+| 400 | Error occurred parsing the supplied body/Invalid `X-User-Claim` header. |
 | 404 | User/Conversation with supplied ID could not be found in database. |
 | 500 | Error occurred updating entries in the database. |
 
 ---
 
-### Get Conversations
+### Get Conversations*
 
 ```
-GET /user/:user/conversation
+GET /user/conversation
 ```
 
 Get the conversations of the specified user.
-
-#### URL Params
-
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 
 #### Success Response (200 OK)
 
@@ -291,14 +278,15 @@ List of conversations.
 
 | Code | Description |
 | ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
 | 500 | Error occurred updating entries in the database. |
 
 ---
 
-### Get Conversation
+### Get Conversation*
 
 ```
-GET /user/:user/conversation/:conversation
+GET /user/conversation/:conversation
 ```
 
 Get a specific conversation of a specific user.
@@ -307,7 +295,6 @@ Get a specific conversation of a specific user.
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 | conversation | String | Conversation's ID. | ✓ |
 
 #### Success Response (200 OK)
@@ -325,24 +312,24 @@ Conversation object.
 
 | Code | Description |
 | ---- | ----------- |
-| 404 | User/Conversation with supplied ID could not be found in database. |
+| 400 | Invalid `X-User-Claim` header. |
+| 404 | Conversation with supplied ID could not be found in database. |
 | 500 | Error occurred retrieving entries from the database. |
 
 ---
 
-### Create Conversation Member
+### Create Conversation Member*
 
 ```
-POST /user/:user/conversation/:conversation/member
+POST /user/conversation/:conversation/member
 ```
 
-Add a member to the specified conversation of the specified member.
+Add a member to the specified conversation.
 
 #### URL Params
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 | conversation | String | Conversation's ID. | ✓ |
 
 #### Body
@@ -359,25 +346,24 @@ Empty body.
 
 | Code | Description |
 | ---- | ----------- |
-| 400 | Error occurred parsing the supplied body/The length of the ID supplied in the body is less than 1. |
+| 400 | Error occurred parsing the supplied body/The length of the ID supplied in the body is less than 1/Invalid `X-User-Claim` header. |
 | 404 | User/Conversation with supplied ID could not be found in database. |
 | 500 | Error occurred updating entries in the database. |
 
 ---
 
-### Get Conversation Members
+### Get Conversation Members*
 
 ```
-GET /user/:user/conversation/:conversation/member
+GET /user/conversation/:conversation/member
 ```
 
-Get the members of the specified conversation of the specified member.
+Get the members of the specified conversation.
 
 #### URL Params
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
 | conversation | String | Conversation's ID. | ✓ |
 
 #### Success (200 OK)
@@ -400,23 +386,18 @@ List of user objects in conversation.
 
 | Code | Description |
 | ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
 | 500 | Error occurred retrieving entries from the database. |
 
 ---
 
-### Create Contact
+### Create Contact*
 
 ```
-POST /user/:user/contact
+POST /user/contact
 ```
 
-Add a new contact for the specified user.
-
-#### URL Params
-
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
+Add a new contact.
 
 #### Body
 
@@ -432,7 +413,7 @@ Empty body
 
 | Code | Description |
 | ---- | ----------- |
-| 400 | Error occurred parsing the supplied body/The length of the ID supplied in the body is less than 1 or equal to the user's ID. |
+| 400 | Error occurred parsing the supplied body/The length of the ID supplied in the body is less than 1 or equal to the user's ID/Invalid `X-User-Claim` header. |
 | 500 | Error occurred updating entries in the database. |
 
 ---
@@ -440,16 +421,10 @@ Empty body
 ### Get Contacts
 
 ```
-GET /user/:user/contact
+GET /user/contact
 ```
 
-Get the contacts of the specified user.
-
-#### URL Params
-
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| user | String | User's ID. | ✓ |
+Get the user's contacts.
 
 #### Success (200 OK)
 
@@ -470,4 +445,5 @@ List of user objects in user's contacts.
 
 | Code | Description |
 | ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
 | 500 | Error occurred retrieving entries from the database. |
