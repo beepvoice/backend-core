@@ -39,14 +39,20 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request, _ httproute
 	log.Print(user)
 
 	// Insert
-	_, err = h.db.Exec(`
-		INSERT INTO "user" (id, first_name, last_name, phone_number) VALUES ($1, $2, $3, $4)
-	`, user.ID, user.FirstName, user.LastName, user.PhoneNumber)
+	var finalId string
+	err = h.db.QueryRow(`
+		INSERT INTO "user" (id, first_name, last_name, phone_number)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT(phone_number)
+			DO UPDATE SET phone_number=EXCLUDED.phone_number, first_name=$2, last_name=$3
+			RETURNING id
+	`, user.ID, user.FirstName, user.LastName, user.PhoneNumber).Scan(&finalId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
 		return
 	}
+	user.ID = finalId
 
 	// Respond
 	w.Header().Set("Content-Type", "application/json")
@@ -474,7 +480,7 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 
 	// Insert
 	_, err = h.db.Exec(`
-		INSERT INTO contact ("user", contact) VALUES ($1, $2)
+		INSERT INTO contact ("user", contact) VALUES ($1, $2) 
 	`, userID, contactId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
