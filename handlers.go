@@ -126,6 +126,33 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 	json.NewEncoder(w).Encode(user)
 }
 
+func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	// Parse
+	username := p.ByName("userername")
+
+	// Response object
+	user := User{}
+
+	// Select
+	err := h.db.QueryRow(`
+		SELECT id, username, first_name, last_name, phone_number FROM "user" WHERE username = $1
+	`, username).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.PhoneNumber)
+
+	switch {
+		case err == sql.ErrNoRows:
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		case err != nil:
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Print(err)
+			return
+	}
+
+	// Respond
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
 func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
 	userID := r.Context().Value("user").(string)

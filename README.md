@@ -29,7 +29,8 @@ Unless otherwise noted, bodies and responses are with `Content-Type: application
 | -------- |
 | [Create User](#Create-User) |
 | [Get Users by Phone](#Get-Users-by-Phone) |
-| [Get User](#Get-User) |
+| [Get User by ID](#Get-User-by-ID) |
+| [Get User by Username(#Get-User-by-Username) ]
 | [Create Conversation](#Create-Conversation) |
 | [Delete Conversation](#Delete-Conversation) |
 | [Update Conversation](#Update-Conversation) |
@@ -65,6 +66,7 @@ Created user object.
 ```json
 {
   "id": "<id>",
+  "username": "<username>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -102,6 +104,7 @@ List of users.
 [
   {
     "id": "<id>",
+    "username": "<username>",
     "first_name": "<first_name>",
     "last_name": "<last_name>"
   },
@@ -119,7 +122,7 @@ List of users.
 
 ---
 
-### Get User
+### Get User by ID
 
 ```
 GET /user/id/:user
@@ -140,6 +143,7 @@ User object.
 ```json
 {
   "id": "<id>",
+  "username": "<username>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -151,6 +155,43 @@ User object.
 | Code | Description |
 | ---- | ----------- |
 | 404 | User with supplied ID could not be found in database |
+| 500 | Error occurred retrieving entries from database. |
+
+---
+
+### Get User by Username
+
+```
+GET /user/username/:username
+```
+
+Get a specific user by username.
+
+#### URL Params
+
+| Name | Type | Description | Required |
+| ---- | ---- | ----------- | -------- |
+| username | String | User's username. | ✓ |
+
+#### Success Response (200 OK)
+
+User object.
+
+```json
+{
+  "id": "<id>",
+  "username": "<username>",
+  "first_name": "<first_name>",
+  "last_name": "<last_name>",
+  "phone_number": "<phone_number>"
+}
+```
+
+#### Errors
+
+| Code | Description |
+| ---- | ----------- |
+| 404 | User with supplied username could not be found in database |
 | 500 | Error occurred retrieving entries from database. |
 
 ---
