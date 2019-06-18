@@ -1,6 +1,7 @@
 
 CREATE TABLE IF NOT EXISTS "user" (
 	id BYTEA PRIMARY KEY,
+	username VARCHAR(63555) UNIQUE,
 	first_name VARCHAR(65535),
 	last_name VARCHAR(65535),
 	phone_number VARCHAR(32) UNIQUE
