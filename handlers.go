@@ -215,7 +215,11 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT id, title FROM "conversation"
+		SELECT id, CASE
+      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+      ELSE title
+    END AS title
+    FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1
 	`, userID)
@@ -252,7 +256,11 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT id, title FROM "conversation"
+		SELECT id, CASE 
+      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+      ELSE title
+    END AS title
+    FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
 	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title)
