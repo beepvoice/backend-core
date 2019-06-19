@@ -41,12 +41,12 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request, _ httproute
 	// Insert
 	var finalId string
 	err = h.db.QueryRow(`
-		INSERT INTO "user" (id, username, first_name, last_name, phone_number)
-			VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO "user" (id, username, bio, first_name, last_name, phone_number)
+			VALUES ($1, $2, $3, $4, $5, $6)
 			ON CONFLICT(phone_number)
 			DO UPDATE SET phone_number=EXCLUDED.phone_number, username=$2, first_name=$3, last_name=$4
 			RETURNING id
-	`, user.ID, user.Username, user.FirstName, user.LastName, user.PhoneNumber).Scan(&finalId)
+	`, user.ID, user.Username, user.Bio, user.FirstName, user.LastName, user.PhoneNumber).Scan(&finalId)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
@@ -74,7 +74,7 @@ func (h *Handler) GetUsersByPhone(w http.ResponseWriter, r *http.Request, _ http
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT id, username, first_name, last_name FROM "user" WHERE phone_number = $1
+		SELECT id, username, bio, first_name, last_name FROM "user" WHERE phone_number = $1
 	`, phone)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (h *Handler) GetUsersByPhone(w http.ResponseWriter, r *http.Request, _ http
 	// Scan
 	for rows.Next() {
 		user := User{}
-		if err := rows.Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName); err != nil {
+		if err := rows.Scan(&user.ID, &user.Username, &user.Bio, &user.FirstName, &user.LastName); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
@@ -108,8 +108,8 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT id, username, first_name, last_name, phone_number FROM "user" WHERE id = $1
-	`, userID).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.PhoneNumber)
+		SELECT id, username, bio, first_name, last_name, phone_number FROM "user" WHERE id = $1
+	`, userID).Scan(&user.ID, &user.Username, &user.Bio, &user.FirstName, &user.LastName, &user.PhoneNumber)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -135,8 +135,8 @@ func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p ht
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT id, username, first_name, last_name, phone_number FROM "user" WHERE username = $1
-	`, username).Scan(&user.ID, &user.Username, &user.FirstName, &user.LastName, &user.PhoneNumber)
+		SELECT id, username, bio, first_name, last_name, phone_number FROM "user" WHERE username = $1
+	`, username).Scan(&user.ID, &user.Username, &user.Bio, &user.FirstName, &user.LastName, &user.PhoneNumber)
 
 	switch {
 		case err == sql.ErrNoRows:
@@ -437,7 +437,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT "user".id, "user".username, "user".first_name, "user".last_name, "user".phone_number FROM "user"
+		SELECT "user".id, "user".username, "user".bio, "user".first_name, "user".last_name, "user".phone_number FROM "user"
 		INNER JOIN member m ON "user".id = m.user AND "user".id != $1
 		INNER JOIN conversation ON "conversation".id = m.conversation
 		INNER JOIN member
@@ -452,13 +452,13 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 
 	// Scan
 	for rows.Next() {
-		var id, username, firstName, lastName, phoneNumber string
-		if err := rows.Scan(&id, &username, &firstName, &lastName, &phoneNumber); err != nil {
+		var id, username, bio, firstName, lastName, phoneNumber string
+		if err := rows.Scan(&id, &username, &bio, &firstName, &lastName, &phoneNumber); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		users = append(users, User{ID: id, Username: username, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
+        users = append(users, User{ID: id, Username: username, Bio: bio, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
 	}
 
 	// Respond
@@ -493,8 +493,8 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	// Create contact if not exists, returning the id regardless
 	var contactId string
 	err = h.db.QueryRow(`
-		INSERT INTO "user" (id, username, first_name, last_name, phone_number)
-			VALUES ($1, '', '', '', $2)
+		INSERT INTO "user" (id, username, bio, first_name, last_name, phone_number)
+			VALUES ($1, '', '', '', '', $2)
 			ON CONFLICT(phone_number)
 			DO UPDATE SET phone_number=EXCLUDED.phone_number
 			RETURNING id
@@ -530,7 +530,7 @@ func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprout
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT id, username, first_name, last_name, phone_number FROM "user"
+		SELECT id, username, bio, first_name, last_name, phone_number FROM "user"
 		INNER JOIN contact
 		ON contact.contact = "user".id AND contact.user = $1
 	`, userID)
@@ -543,13 +543,13 @@ func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprout
 
 	// Scan
 	for rows.Next() {
-		var id, username, firstName, lastName, phone string
-		if err := rows.Scan(&id, &username, &firstName, &lastName, &phone); err != nil {
+		var id, username, bio, firstName, lastName, phone string
+		if err := rows.Scan(&id, &username, &bio, &firstName, &lastName, &phone); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		contacts = append(contacts, User{id, username, firstName, lastName, phone})
+		contacts = append(contacts, User{id, username, bio, firstName, lastName, phone})
 	}
 
 	// Respond

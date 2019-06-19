@@ -55,6 +55,8 @@ Create a new user.
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
+| username | String | Username of the added user. Must be unique. | ✓ |
+| bio | String | Bio of the added user | ✓ |
 | first_name | String | First name of the added user. | ✓ |
 | last_name | String | Last name of the added user. | ✓ |
 | phone_number | String | Phone number of the added user. Shouldn't be needed but makes life easier. | X |
@@ -67,6 +69,7 @@ Created user object.
 {
   "id": "<id>",
   "username": "<username>",
+  "bio": "<bio>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -105,6 +108,7 @@ List of users.
   {
     "id": "<id>",
     "username": "<username>",
+    "bio": "<bio>",
     "first_name": "<first_name>",
     "last_name": "<last_name>"
   },
@@ -144,6 +148,7 @@ User object.
 {
   "id": "<id>",
   "username": "<username>",
+  "bio": "<bio>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -181,6 +186,7 @@ User object.
 {
   "id": "<id>",
   "username": "<username>",
+  "bio": "<bio>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -475,6 +481,8 @@ List of user objects in user's contacts.
 [
   {
     "id": "<id>",
+    "username": "<username>",
+    "bio": "<bio>",
     "first_name": "<first_name>",
     "last_name": "<last_name>"
   },
