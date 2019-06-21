@@ -1,8 +1,9 @@
 INSERT INTO "user" (
-  id, username, bio, first_name, last_name, phone_number
+  id, username, bio, profile_pic, first_name, last_name, phone_number
 ) VALUES (
   'u-7f48e2f2b6f7e4d1f9c864e48bc2b0f2',
   'ambc',
+  '',
   '',
   'Ambrose',
   'Chua',
@@ -10,10 +11,11 @@ INSERT INTO "user" (
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "user" (
-  id, username, bio, first_name, last_name, phone_number
+  id, username, bio, profile_pic, first_name, last_name, phone_number
 ) VALUES (
   'u-dc9537ca645ff34b4f289b6bd7aa08b7',
   'orcas',
+  '',
   '',
   'Daniel',
   'Lim',
@@ -21,10 +23,11 @@ INSERT INTO "user" (
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "user" (
-  id, username, bio, first_name, last_name, phone_number
+  id, username, bio, profile_pic, first_name, last_name, phone_number
 ) VALUES (
   'u-23e608245d0866ea937f15876adb5ef6',
   'it',
+  '',
   '',
   'Isaac',
   'Tay',
@@ -32,10 +35,11 @@ INSERT INTO "user" (
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "user" (
-  id, username, bio, first_name, last_name, phone_number
+  id, username, bio, profile_pic, first_name, last_name, phone_number
 ) VALUES (
   'u-fb91825f564a3cc110f11836fedea6f4',
   'solderneer',
+  '',
   '',
   'Sudharshan',
   '',

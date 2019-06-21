@@ -8,7 +8,8 @@ type Conversation struct {
 type User struct {
 	ID          string `json:"id"`           // id
 	Username 		string `json:"username"`		 // username
-    Bio         string `json:"bio"`          // bio
+  Bio         string `json:"bio"`          // bio
+  ProfilePic  string `json:"profile_pic"`  // profile_pic
 	FirstName   string `json:"first_name"`   // first_name
 	LastName    string `json:"last_name"`    // last_name
 	PhoneNumber string `json:"phone_number"` // phone_number
