@@ -153,6 +153,50 @@ func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p ht
 	json.NewEncoder(w).Encode(user)
 }
 
+func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+  // Parse
+  userID := r.Context().Value("user").(string)
+  user := User{}
+  decoder := json.NewDecoder(r.Body)
+  err := decoder.Decode(&user)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+  // Check for duplicate username
+  var _id string
+  err = h.db.QueryRow(`
+    SELECT id FROM "user" WHERE "user".id <> $1 AND "user".username = $2
+  `, userID, user.Username).Scan(&_id)
+  if err == nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+  } else if err != sql.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+  }
+
+  // Update
+  _, err = h.db.Exec(`
+		UPDATE "user"
+		SET 
+      username = $2,
+      bio = $3,
+      profile_pic = $4,
+      first_name = $5,
+      last_name = $6
+		WHERE id = $1
+	`, userID, user.Username, user.Bio, user.ProfilePic, user.FirstName, user.LastName)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Print(err)
+		return
+	}
+
+	w.WriteHeader(200);
+}
+
 func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
 	userID := r.Context().Value("user").(string)
@@ -335,7 +379,7 @@ func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p h
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
-		return
+	  return
 	}
 
 	// Check

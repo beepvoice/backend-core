@@ -43,7 +43,7 @@ func main() {
 	router.GET("/user", h.GetUsersByPhone)
 	router.GET("/user/id/:user", h.GetUser)
 	router.GET("/user/username/:username", h.GetUserByUsername)
-	//router.PATCH("/user/:user", h.UpdateUser)
+  router.PATCH("/user", h.UpdateUser)
 	// Conversations
 	router.POST("/user/conversation", AuthMiddleware(h.CreateConversation))
 	router.GET("/user/conversation", AuthMiddleware(h.GetConversations)) // USER MEMBER CONVERSATION

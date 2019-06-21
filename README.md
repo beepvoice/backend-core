@@ -31,6 +31,7 @@ Unless otherwise noted, bodies and responses are with `Content-Type: application
 | [Get Users by Phone](#Get-Users-by-Phone) |
 | [Get User by ID](#Get-User-by-ID) |
 | [Get User by Username(#Get-User-by-Username) ]
+| [Update User](#Update-User) |
 | [Create Conversation](#Create-Conversation) |
 | [Delete Conversation](#Delete-Conversation) |
 | [Update Conversation](#Update-Conversation) |
@@ -57,6 +58,7 @@ Create a new user.
 | ---- | ---- | ----------- | -------- |
 | username | String | Username of the added user. Must be unique. | ✓ |
 | bio | String | Bio of the added user | ✓ |
+| profile_pic | String | URL of added user's profile picture | ✓ |
 | first_name | String | First name of the added user. | ✓ |
 | last_name | String | Last name of the added user. | ✓ |
 | phone_number | String | Phone number of the added user. Shouldn't be needed but makes life easier. | X |
@@ -70,6 +72,7 @@ Created user object.
   "id": "<id>",
   "username": "<username>",
   "bio": "<bio>",
+  "profile_pic: "<profile_pic>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -109,6 +112,7 @@ List of users.
     "id": "<id>",
     "username": "<username>",
     "bio": "<bio>",
+    "profile_pic": "<profile_pic>",
     "first_name": "<first_name>",
     "last_name": "<last_name>"
   },
@@ -149,6 +153,7 @@ User object.
   "id": "<id>",
   "username": "<username>",
   "bio": "<bio>",
+  "profile_pic": "<profile_pic>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -187,6 +192,7 @@ User object.
   "id": "<id>",
   "username": "<username>",
   "bio": "<bio>",
+  "profile_pic": "<profile_pic>",
   "first_name": "<first_name>",
   "last_name": "<last_name>",
   "phone_number": "<phone_number>"
@@ -199,6 +205,37 @@ User object.
 | ---- | ----------- |
 | 404 | User with supplied username could not be found in database |
 | 500 | Error occurred retrieving entries from database. |
+
+---
+
+### Update User
+
+```
+PATCH /user
+```
+
+Update an existing user. User ID is taken from header supplied by `backend-auth`. If one does not wish to update a field, leave it the value acquire from Get-User.
+
+#### Body
+
+| Name | Type | Description | Required |
+| ---- | ---- | ----------- | -------- |
+| username | String | Updated username. | X |
+| bio | String | Updated bio. | X |
+| profile_pic | String | Updated URL of profile picture. | X |
+| first_name | String | Updated first name. | X |
+| last_name | String | Updated last name | X |
+
+#### Success (200 OK)
+
+Empty body.
+
+#### Errors
+
+| Code | Description |
+| ---- | ----------- |
+| 400 | Error parsing body/User with username already exists. |
+| 500 | Error occurred updating database. |
 
 ---
 
@@ -421,6 +458,9 @@ List of user objects in conversation.
 [
   {
     "id": "<id>",
+    "username": "<username>",
+    "bio": "<bio>",
+    "profile_pic": "<profile_pic>",
     "first_name": "<first_name>",
     "last_name": "<last_name>",
     "phone_number": "<phone_number>"
@@ -483,6 +523,7 @@ List of user objects in user's contacts.
     "id": "<id>",
     "username": "<username>",
     "bio": "<bio>",
+    "profile_pic": "<profile_pic",
     "first_name": "<first_name>",
     "last_name": "<last_name>"
   },
