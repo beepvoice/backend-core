@@ -26,3 +26,29 @@ CREATE TABLE IF NOT EXISTS contact (
 	contact BYTEA REFERENCES "user"(id),
 	UNIQUE ("user", contact)
 );
+
+CREATE OR REPLACE FUNCTION notify_permissions_new () RETURNS TRIGGER AS $$
+  BEGIN
+    PERFORM pg_notify('member_new', CONCAT(NEW."user", '+', NEW."conversation"));
+    RETURN NULL;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION notify_permissions_delete () RETURNS TRIGGER AS $$
+  BEGIN
+    PERFORM pg_notify('member_delete', CONCAT(OLD."user", '+', OLD."conversation"));
+    RETURN NULL;
+  END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER notify_permissions_new
+  AFTER INSERT OR UPDATE
+  ON "member"
+  FOR EACH ROW
+    EXECUTE PROCEDURE notify_permissions_new();
+
+CREATE TRIGGER notify_permissions_delete
+  AFTER DELETE
+  ON "member"
+  FOR EACH ROW
+    EXECUTE PROCEDURE notify_permissions_delete();
