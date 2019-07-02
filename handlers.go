@@ -225,8 +225,8 @@ func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p h
 
 	// Conversation
 	_, err1 := tx.Exec(`
-		INSERT INTO "conversation" (id, title) VALUES ($1, $2)
-	`, conversation.ID, conversation.Title)
+		INSERT INTO "conversation" (id, title, dm) VALUES ($1, $2, $3)
+	`, conversation.ID, conversation.Title, conversation.DM)
 	// First member
 	_, err2 := tx.Exec(`
 		INSERT INTO member ("user", "conversation") VALUES ($1, $2)

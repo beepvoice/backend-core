@@ -3,6 +3,7 @@ package main
 type Conversation struct {
 	ID    string `json:"id"`    // id
 	Title string `json:"title"` // title
+  DM    bool   `json:"dm"`    // dm
 }
 
 type User struct {

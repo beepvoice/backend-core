@@ -23,14 +23,14 @@ Supply environment variables by either exporting them or editing ```.env```.
 
 ## API
 
-Unless otherwise noted, bodies and responses are with `Content-Type: application/json`. Endpoints marked with a `*` require a populated `X-User-Claim` header from `backend-auth`.
+Unless otherwise noted, bodies and responses are with `Content-Type: application/json`. Endpoints marked with a ```*``` require a populated `X-User-Claim` header from `backend-auth`.
 
 | Contents |
 | -------- |
 | [Create User](#Create-User) |
 | [Get Users by Phone](#Get-Users-by-Phone) |
 | [Get User by ID](#Get-User-by-ID) |
-| [Get User by Username(#Get-User-by-Username) ]
+| [Get User by Username](#Get-User-by-Username) ]
 | [Update User](#Update-User) |
 | [Create Conversation](#Create-Conversation) |
 | [Delete Conversation](#Delete-Conversation) |
@@ -252,6 +252,7 @@ Create a new conversation for a user.
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
 | title | String | Title of the conversation | X |
+| dm | Boolean | Whether the conversation is a DM or not | X |
 
 #### Success Response (200 OK)
 
