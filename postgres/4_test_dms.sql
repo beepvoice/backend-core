@@ -1,10 +1,11 @@
 /* Ambrose-Daniel */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-f614f9c3670ad0475e819d76397abf0d',
   TRUE,
-  'Ambrose-Daniel'
+  'Ambrose-Daniel',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (
@@ -23,11 +24,12 @@ INSERT INTO "member" (
 
 /* Ambrose-Isaac */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-d218888bdf510bbe1628d9983d75560f',
   TRUE,
-  'Ambrose-Isaac'
+  'Ambrose-Isaac',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (
@@ -46,11 +48,12 @@ INSERT INTO "member" (
 
 /* Ambrose-Sudharshan */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-fab2c2fb3befdbb2fe7abf444cbe3846',
   TRUE,
-  'Ambrose-Sudharshan'
+  'Ambrose-Sudharshan',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (
@@ -69,11 +72,12 @@ INSERT INTO "member" (
 
 /* Daniel-Isaac */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-a1db4a9455dbc6c11ea2fa36f6bfa782',
   TRUE,
-  'Daniel-Isaac'
+  'Daniel-Isaac',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (
@@ -92,11 +96,12 @@ INSERT INTO "member" (
 
 /* Daniel-Sudharshan */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-a3715860dcd95d1a105c12b7379e6d34',
   TRUE,
-  'Daniel-Sudharshan'
+  'Daniel-Sudharshan',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (
@@ -115,11 +120,12 @@ INSERT INTO "member" (
 
 /* Isaac-Sudharshan */
 INSERT INTO "conversation" (
-  "id", "dm", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-6f2ba396fb53961ff8a6ba9c5d286a25',
   TRUE,
-  'Isaac-Sudharshan'
+  'Isaac-Sudharshan',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (

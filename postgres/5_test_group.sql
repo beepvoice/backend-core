@@ -1,8 +1,10 @@
 INSERT INTO "conversation" (
-  "id", "title"
+  "id", "dm", "title", "picture"
 ) VALUES (
   'c-d73b6afa2fe3685faad28eba36d8cd0a',
-  'AWESOME'
+  FALSE,
+  'AWESOME',
+  ''
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO "member" (

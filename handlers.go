@@ -282,7 +282,7 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 			log.Print(err)
 			return
 		}
-		conversations = append(conversations, Conversation{id, title})
+    conversations = append(conversations, Conversation{ID:id, Title:title, DM:false})
 	}
 
 	// Respond
