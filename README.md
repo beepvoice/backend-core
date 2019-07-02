@@ -253,6 +253,7 @@ Create a new conversation for a user.
 | ---- | ---- | ----------- | -------- |
 | title | String | Title of the conversation | X |
 | dm | Boolean | Whether the conversation is a DM or not | X |
+| picture | String | URL of the group's picture | X |
 
 #### Success Response (200 OK)
 
@@ -261,7 +262,8 @@ Conversation object.
 ```json
 {
   "id": "<id>",
-  "title": "<title>"
+  "title": "<title>",
+  "picture": "<picture>"
 }
 ```
 
@@ -322,6 +324,7 @@ Update a conversation's details (mainly just title for now).
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
 | title | String | New title of the conversation. | X |
+| picture | String | New URL of the group's picture | X |
 
 #### Success Response (200 OK)
 
@@ -354,6 +357,7 @@ List of conversations.
   {
     "id": "<id>",
     "title": "<title>"
+    "picture": "<picture>"
   },
   ...
 ]
@@ -389,7 +393,8 @@ Conversation object.
 ```json
 {
   "id": "<id>",
-  "title": "<title>"
+  "title": "<title>",
+  "picture": "<picture>"
 }
 ```
 

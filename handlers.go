@@ -225,8 +225,8 @@ func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p h
 
 	// Conversation
 	_, err1 := tx.Exec(`
-		INSERT INTO "conversation" (id, title, dm) VALUES ($1, $2, $3)
-	`, conversation.ID, conversation.Title, conversation.DM)
+		INSERT INTO "conversation" (id, title, dm, picture) VALUES ($1, $2, $3, $4)
+	`, conversation.ID, conversation.Title, conversation.DM, conversation.Picture)
 	// First member
 	_, err2 := tx.Exec(`
 		INSERT INTO member ("user", "conversation") VALUES ($1, $2)
@@ -262,7 +262,8 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 		SELECT id, CASE
       WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
       ELSE title
-    END AS title
+    END AS title,
+    picture
     FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1
@@ -276,13 +277,13 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Scan
 	for rows.Next() {
-		var id, title string
-		if err := rows.Scan(&id, &title); err != nil {
+		var id, title, picture string
+		if err := rows.Scan(&id, &title, &picture); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-    conversations = append(conversations, Conversation{ID:id, Title:title, DM:false})
+    conversations = append(conversations, Conversation{ID:id, Title:title, DM:false, Picture:picture})
 	}
 
 	// Respond
@@ -303,11 +304,12 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 		SELECT id, CASE 
       WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
       ELSE title
-    END AS title
+    END AS title,
+    picture
     FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
-	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title)
+	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -357,9 +359,9 @@ func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p h
 	if len(conversation.Title) > 0 {
 		_, err = h.db.Exec(`
 			UPDATE "conversation"
-			SET title = $2
+			SET title = $2, picture = $3
 			WHERE id = $1
-		`, conversationID, conversation.Title)
+		`, conversationID, conversation.Title, conversation.Picture)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)

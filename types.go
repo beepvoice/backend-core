@@ -1,9 +1,10 @@
 package main
 
 type Conversation struct {
-	ID    string `json:"id"`    // id
-	Title string `json:"title"` // title
-  DM    bool   `json:"dm"`    // dm
+	ID      string `json:"id"`      // id
+	Title   string `json:"title"`   // title
+  DM      bool   `json:"dm"`      // dm
+  Picture string `json:"picture"` // picture
 }
 
 type User struct {
