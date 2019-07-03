@@ -59,7 +59,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request, _ httproute
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h *Handler) GetUsersByPhone(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *Handler) GetUserByPhone(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Parse
 	phone, err := ParsePhone(r.FormValue("phone_number"))
 
@@ -70,33 +70,22 @@ func (h *Handler) GetUsersByPhone(w http.ResponseWriter, r *http.Request, _ http
 	}
 
 	// Response object
-	users := make([]User, 0)
+  user := User{}
 
 	// Select
-	rows, err := h.db.Query(`
-		SELECT id, username, bio, profile_pic, first_name, last_name FROM "user" WHERE phone_number = $1
-	`, phone)
+	err = h.db.QueryRow(`
+		SELECT id, username, bio, profile_pic, first_name, last_name, phone_number FROM "user" WHERE phone_number = $1
+	`, phone).Scan(&user.ID, &user.Username, &user.Bio, &user.ProfilePic, &user.FirstName, &user.LastName, &user.PhoneNumber)
+
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		log.Print(err)
+    log.Print(err)
 		return
-	}
-	defer rows.Close()
-
-	// Scan
-	for rows.Next() {
-		user := User{}
-		if err := rows.Scan(&user.ID, &user.Username, &user.Bio, &user.ProfilePic, &user.FirstName, &user.LastName); err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			log.Print(err)
-			return
-		}
-		users = append(users, user)
 	}
 
 	// Respond
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(user)
 }
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
