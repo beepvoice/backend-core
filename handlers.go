@@ -448,7 +448,33 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Log
 	log.Print(member)
 
-	// Check
+  // Check for valid conversation and prevent duplicate entries
+  var test string
+  err = h.db.QueryRow(`
+    SELECT "conversation".id FROM "conversation", "member"
+    WHERE 
+      "conversation".id = $1
+      AND (
+        "conversation".dm = FALSE
+        OR (SELECT 
+          COUNT("member".user)
+          FROM "member"
+          WHERE "member".conversation = $1)
+        <= 2)
+      AND "member".conversation = "conversation".id
+      AND "member".user <> $2
+  `, conversationID, member.ID).Scan(&test)
+	switch {
+    case err == sql.ErrNoRows:
+      http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+      return
+    case err != nil:
+      http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+      log.Print(err)
+      return
+	}
+
+  // Check user adding the user is in conversation
 	var conversationID2 string
 	err = h.db.QueryRow(`
 		SELECT id FROM "conversation"
