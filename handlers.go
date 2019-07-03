@@ -448,6 +448,23 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Log
 	log.Print(member)
 
+  // Check for existing DM
+  var dmID string
+  err = h.db.QueryRow(`
+    SELECT "conversation".id FROM "conversation", "member"
+    WHERE
+      "conversation".dm = TRUE
+      AND "conversation".id = "member".conversation
+      AND "member".user = $1
+  `, member.ID).Scan(&dmID)
+  if err != sql.ErrNoRows {
+    http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) 
+    return
+  } else if err == nil {
+    w.Write([]byte(dmID))
+    return
+  }
+
   // Check for valid conversation and prevent duplicate entries
   var test string
   err = h.db.QueryRow(`
@@ -504,7 +521,7 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Respond
 	//w.Header().Set("Content-Type", "application/json")
 	//json.NewEncoder(w).Encode(member)
-	w.WriteHeader(200)
+	w.Write([]byte(conversationID))
 }
 
 func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

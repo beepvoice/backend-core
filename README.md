@@ -430,7 +430,7 @@ Add a member to the specified conversation.
 
 #### Success Response (200 OK)
 
-Empty body.
+The conversation ID of the conversation the user is added to.
 
 #### Errors
 
