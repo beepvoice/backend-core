@@ -128,7 +128,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request, p httprouter.P
 
 func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	username := p.ByName("userername")
+	username := p.ByName("username")
 
 	// Response object
 	user := User{}
