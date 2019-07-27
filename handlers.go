@@ -70,7 +70,7 @@ func (h *Handler) GetUserByPhone(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 
 	// Response object
-  user := User{}
+	user := User{}
 
 	// Select
 	err = h.db.QueryRow(`
@@ -79,7 +79,7 @@ func (h *Handler) GetUserByPhone(w http.ResponseWriter, r *http.Request, _ httpr
 
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-    log.Print(err)
+		log.Print(err)
 		return
 	}
 
@@ -128,13 +128,13 @@ func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p ht
 	`, username).Scan(&user.ID, &user.Username, &user.Bio, &user.ProfilePic, &user.FirstName, &user.LastName, &user.PhoneNumber)
 
 	switch {
-		case err == sql.ErrNoRows:
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		case err != nil:
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			log.Print(err)
-			return
+	case err == sql.ErrNoRows:
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Print(err)
+		return
 	}
 
 	// Respond
@@ -143,38 +143,38 @@ func (h *Handler) GetUserByUsername(w http.ResponseWriter, r *http.Request, p ht
 }
 
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-  // Parse
-  userID := r.Context().Value("user").(string)
-  user := User{}
-  decoder := json.NewDecoder(r.Body)
-  err := decoder.Decode(&user)
+	// Parse
+	userID := r.Context().Value("user").(string)
+	user := User{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&user)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
-  // Check for duplicate username
-  var _id string
-  err = h.db.QueryRow(`
-    SELECT id FROM "user" WHERE "user".id <> $1 AND "user".username = $2
-  `, userID, user.Username).Scan(&_id)
-  if err == nil {
+	// Check for duplicate username
+	var _id string
+	err = h.db.QueryRow(`
+		SELECT id FROM "user" WHERE "user".id <> $1 AND "user".username = $2
+	`, userID, user.Username).Scan(&_id)
+	if err == nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
-  } else if err != sql.ErrNoRows {
+	} else if err != sql.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
-  }
+	}
 
-  // Update
-  _, err = h.db.Exec(`
+	// Update
+	_, err = h.db.Exec(`
 		UPDATE "user"
 		SET 
-      username = $2,
-      bio = $3,
-      profile_pic = $4,
-      first_name = $5,
-      last_name = $6
+		username = $2,
+		bio = $3,
+		profile_pic = $4,
+		first_name = $5,
+		last_name = $6
 		WHERE id = $1
 	`, userID, user.Username, user.Bio, user.ProfilePic, user.FirstName, user.LastName)
 	if err != nil {
@@ -183,7 +183,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httproute
 		return
 	}
 
-	w.WriteHeader(200);
+	w.WriteHeader(200)
 }
 
 func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -249,11 +249,11 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 	// Select
 	rows, err := h.db.Query(`
 		SELECT id, CASE
-      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-      ELSE title
-    END AS title,
-    picture
-    FROM "conversation"
+		WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+		ELSE title
+		END AS title,
+		picture
+		FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1
 	`, userID)
@@ -272,7 +272,7 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 			log.Print(err)
 			return
 		}
-    conversations = append(conversations, Conversation{ID:id, Title:title, DM:false, Picture:picture})
+		conversations = append(conversations, Conversation{ID: id, Title: title, DM: false, Picture: picture})
 	}
 
 	// Respond
@@ -291,11 +291,11 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 	// Select
 	err := h.db.QueryRow(`
 		SELECT id, CASE 
-      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-      ELSE title
-    END AS title,
-    picture
-    FROM "conversation"
+		WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+		ELSE title
+		END AS title,
+		picture
+		FROM "conversation"
 		INNER JOIN member
 		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
 	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture)
@@ -358,7 +358,7 @@ func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p h
 		}
 	}
 
-	w.WriteHeader(200);
+	w.WriteHeader(200)
 }
 
 func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -370,7 +370,7 @@ func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p h
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
-	  return
+		return
 	}
 
 	// Check
@@ -437,50 +437,50 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Log
 	log.Print(member)
 
-  // Check for existing DM
-  var dmID string
-  err = h.db.QueryRow(`
-    SELECT "conversation".id FROM "conversation", "member"
-    WHERE
-      "conversation".dm = TRUE
-      AND "conversation".id = "member".conversation
-      AND "member".user = $1
-  `, member.ID).Scan(&dmID)
-  if err != sql.ErrNoRows {
-    http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) 
-    return
-  } else if err == nil {
-    w.Write([]byte(dmID))
-    return
-  }
-
-  // Check for valid conversation and prevent duplicate entries
-  var test string
-  err = h.db.QueryRow(`
-    SELECT "conversation".id FROM "conversation", "member"
-    WHERE 
-      "conversation".id = $1
-      AND (
-        "conversation".dm = FALSE
-        OR (SELECT 
-          COUNT("member".user)
-          FROM "member"
-          WHERE "member".conversation = $1)
-        <= 2)
-      AND "member".conversation = "conversation".id
-      AND "member".user <> $2
-  `, conversationID, member.ID).Scan(&test)
-	switch {
-    case err == sql.ErrNoRows:
-      http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-      return
-    case err != nil:
-      http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-      log.Print(err)
-      return
+	// Check for existing DM
+	var dmID string
+	err = h.db.QueryRow(`
+		SELECT "conversation".id FROM "conversation", "member"
+		WHERE
+		"conversation".dm = TRUE
+		AND "conversation".id = "member".conversation
+		AND "member".user = $1
+	`, member.ID).Scan(&dmID)
+	if err != sql.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	} else if err == nil {
+		w.Write([]byte(dmID))
+		return
 	}
 
-  // Check user adding the user is in conversation
+	// Check for valid conversation and prevent duplicate entries
+	var test string
+	err = h.db.QueryRow(`
+		SELECT "conversation".id FROM "conversation", "member"
+		WHERE 
+		"conversation".id = $1
+		AND (
+		"conversation".dm = FALSE
+		OR (SELECT 
+		COUNT("member".user)
+		FROM "member"
+		WHERE "member".conversation = $1)
+		<= 2)
+		AND "member".conversation = "conversation".id
+		AND "member".user <> $2
+	`, conversationID, member.ID).Scan(&test)
+	switch {
+	case err == sql.ErrNoRows:
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	case err != nil:
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Print(err)
+		return
+	}
+
+	// Check user adding the user is in conversation
 	var conversationID2 string
 	err = h.db.QueryRow(`
 		SELECT id FROM "conversation"
@@ -544,7 +544,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 			log.Print(err)
 			return
 		}
-    users = append(users, User{ID: id, Username: username, Bio: bio, ProfilePic: profilePic, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
+		users = append(users, User{ID: id, Username: username, Bio: bio, ProfilePic: profilePic, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
 	}
 
 	// Respond
@@ -555,6 +555,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 type PhoneNumber struct {
 	PhoneNumber string `json:"phone_number"`
 }
+
 func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
 	userID := r.Context().Value("user").(string)

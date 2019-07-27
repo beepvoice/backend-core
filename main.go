@@ -18,12 +18,12 @@ var postgres string
 
 func main() {
 	// Load .env
-  err := godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
-  listen = os.Getenv("LISTEN")
-  postgres = os.Getenv("POSTGRES")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	listen = os.Getenv("LISTEN")
+	postgres = os.Getenv("POSTGRES")
 
 	// Open postgres
 	log.Printf("connecting to postgres %s", postgres)
@@ -43,7 +43,7 @@ func main() {
 	router.GET("/user", h.GetUserByPhone)
 	router.GET("/user/id/:user", h.GetUser)
 	router.GET("/user/username/:username", h.GetUserByUsername)
-  router.PATCH("/user", h.UpdateUser)
+	router.PATCH("/user", h.UpdateUser)
 	// Conversations
 	router.POST("/user/conversation", AuthMiddleware(h.CreateConversation))
 	router.GET("/user/conversation", AuthMiddleware(h.GetConversations)) // USER MEMBER CONVERSATION
@@ -70,26 +70,27 @@ func main() {
 }
 
 type RawClient struct {
-  UserId string `json:"userid"`
-  ClientId string `json:"clientid"`
+	UserId   string `json:"userid"`
+	ClientId string `json:"clientid"`
 }
+
 func AuthMiddleware(next httprouter.Handle) httprouter.Handle {
-  return func (w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-    ua := r.Header.Get("X-User-Claim")
-    if ua == "" {
-      http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-  		return
-    }
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		ua := r.Header.Get("X-User-Claim")
+		if ua == "" {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 
-    var client RawClient
-    err := json.Unmarshal([]byte(ua), &client)
+		var client RawClient
+		err := json.Unmarshal([]byte(ua), &client)
 
-    if err != nil {
-      http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-  		return
-    }
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 
-    context := context.WithValue(r.Context(), "user", client.UserId)
-    next(w, r.WithContext(context), p)
-  }
+		context := context.WithValue(r.Context(), "user", client.UserId)
+		next(w, r.WithContext(context), p)
+	}
 }
