@@ -5,6 +5,7 @@ type Conversation struct {
 	Title   string `json:"title"`   // title
   DM      bool   `json:"dm"`      // dm
   Picture string `json:"picture"` // picture
+  Pinned  bool   `json:"pinned"`  // pinned
 }
 
 type User struct {

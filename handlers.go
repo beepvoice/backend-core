@@ -248,14 +248,14 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT id, CASE
-      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+		SELECT "conversation".id, CASE
+      WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
       ELSE title
     END AS title,
-    picture
-    FROM "conversation"
-		INNER JOIN member
-		ON member.conversation = "conversation".id AND member.user = $1
+    "conversation".picture,
+    member.pinned
+    FROM "conversation", member
+    WHERE member.conversation = "conversation".id AND member.user = $1
 	`, userID)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -290,14 +290,14 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT id, CASE 
-      WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+		SELECT "conversation".id, CASE 
+    WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
       ELSE title
     END AS title,
-    picture
-    FROM "conversation"
-		INNER JOIN member
-		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
+    "conversation" picture,
+    member.pinned
+    FROM "conversation", member
+    WHERE member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
 	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture)
 
 	switch {
@@ -641,6 +641,31 @@ func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprout
 	// Respond
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(contacts)
+}
+
+func (h *Handler) PinConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+  conversationID := p.ByName("conversation")
+  userID := r.Context().Value("user").(string)
+
+  // Check relation exists
+  var exists int
+  err := h.db.QueryRow(`SELECT 1 FROM member WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID).Scan(&exists)
+  if err == sql.ErrNoRows {
+    http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+    return
+  } else if err != nil {
+    http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+    return
+  }
+
+  // Update relation
+  _, err = h.db.Exec(`UPDATE "member" SET "pinned" = TRUE WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID)
+  if err != nil {
+    http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+    return
+  }
+
+  w.WriteHeader(200)
 }
 
 func NewHandler(db *sql.DB) *Handler {

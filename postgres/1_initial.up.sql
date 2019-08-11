@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS "conversation" (
 CREATE TABLE IF NOT EXISTS member (
 	"user" BYTEA REFERENCES "user"(id),
 	"conversation" BYTEA REFERENCES "conversation"(id),
+  "pinned" BOOLEAN DEFAULT FALSE,
 	UNIQUE ("user", "conversation")
 );
 

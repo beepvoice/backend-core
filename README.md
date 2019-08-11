@@ -357,7 +357,8 @@ List of conversations.
   {
     "id": "<id>",
     "title": "<title>"
-    "picture": "<picture>"
+    "picture": "<picture>",
+    "pinned: "<pinned:bool>"
   },
   ...
 ]
@@ -394,7 +395,8 @@ Conversation object.
 {
   "id": "<id>",
   "title": "<title>",
-  "picture": "<picture>"
+  "picture": "<picture>",
+  "pinned: "<pinned:bool>"
 }
 ```
 
@@ -405,6 +407,34 @@ Conversation object.
 | 400 | Invalid `X-User-Claim` header. |
 | 404 | Conversation with supplied ID could not be found in database. |
 | 500 | Error occurred retrieving entries from the database. |
+
+---
+
+### Pin Conversation
+
+```
+POST /user/conversation/:conversation/pin
+```
+
+Mark the specified conversation as pinned.
+
+#### URL Params
+
+| Name | Type | Description | Required |
+| ---- | ---- | ----------- | -------- |
+| conversation | String | Conversation's ID. | ✓ |
+
+#### Success Response (200 OK)
+
+Blank body.
+
+#### Errors
+
+| Code | Description |
+| ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
+| 404 | Conversation with supplied ID could not be found in database. |
+| 500 | Error occurred editing entry in the database. |
 
 ---
 
