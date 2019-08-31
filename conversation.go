@@ -71,14 +71,14 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT id, CASE
-		WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-		ELSE title
-		END AS title,
-		picture
-		FROM "conversation"
-		INNER JOIN member
-		ON member.conversation = "conversation".id AND member.user = $1
+		SELECT "conversation".id, CASE
+      WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+      ELSE title
+    END AS title,
+    "conversation".picture,
+    member.pinned
+    FROM "conversation", member
+    WHERE member.conversation = "conversation".id AND member.user = $1
 	`, userID)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -113,14 +113,14 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT id, CASE 
-		WHEN dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-		ELSE title
-		END AS title,
-		picture
-		FROM "conversation"
-		INNER JOIN member
-		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
+		SELECT "conversation".id, CASE
+    WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
+      ELSE title
+    END AS title,
+    "conversation" picture,
+    member.pinned
+    FROM "conversation", member
+    WHERE member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
 	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture)
 
 	switch {
@@ -263,12 +263,12 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Check for existing DM
 	var dmID string
 	err = h.db.QueryRow(`
-		SELECT "conversation".id FROM "conversation", "member"
-		WHERE
-		"conversation".dm = TRUE
-		AND "conversation".id = "member".conversation
-		AND "member".user = $1
-	`, member.ID).Scan(&dmID)
+    SELECT "conversation".id FROM "conversation", "member"
+    WHERE
+      "conversation".dm = TRUE
+      AND "conversation".id = "member".conversation
+      AND "member".user = $1
+  `, member.ID).Scan(&dmID)
 	if err != sql.ErrNoRows {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -280,19 +280,19 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Check for valid conversation and prevent duplicate entries
 	var test string
 	err = h.db.QueryRow(`
-		SELECT "conversation".id FROM "conversation", "member"
-		WHERE 
-		"conversation".id = $1
-		AND (
-		"conversation".dm = FALSE
-		OR (SELECT 
-		COUNT("member".user)
-		FROM "member"
-		WHERE "member".conversation = $1)
-		<= 2)
-		AND "member".conversation = "conversation".id
-		AND "member".user <> $2
-	`, conversationID, member.ID).Scan(&test)
+    SELECT "conversation".id FROM "conversation", "member"
+    WHERE
+      "conversation".id = $1
+      AND (
+        "conversation".dm = FALSE
+        OR (SELECT
+          COUNT("member".user)
+          FROM "member"
+          WHERE "member".conversation = $1)
+        <= 2)
+      AND "member".conversation = "conversation".id
+      AND "member".user <> $2
+  `, conversationID, member.ID).Scan(&test)
 	switch {
 	case err == sql.ErrNoRows:
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
