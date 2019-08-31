@@ -1,0 +1,40 @@
+kind: pipeline
+name: tests-integration
+steps:
+  - name: go
+    image: golang:1.12
+    commands:
+      - go test -tags=integration
+    environment:
+      POSTGRES: postgresql://root@pg:5432/core?sslmode=disable
+services:
+  - name: pg
+    image: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=core
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+trigger:
+  branch:
+    - master
+    - develop
+  event:
+    - push
+    - pull_request
+---
+kind: pipeline
+name: tests-unit
+steps:
+  - name: go
+    image: golang:1.12
+    commands:
+      - go test -tags=unit
+trigger:
+  branch:
+    - master
+    - develop
+  event:
+    - push
+    - pull_request
