@@ -19,7 +19,20 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	// Database
+	db := connect()
+	// Handler
+	h := NewHandler(db)
+	// Routes
+	router := NewRouter(h)
+
 	listen = os.Getenv("LISTEN")
+	log.Printf("starting server on %s", listen)
+	log.Fatal(http.ListenAndServe(listen, router))
+}
+
+func connect() *sql.DB {
 	postgres = os.Getenv("POSTGRES")
 
 	// Open postgres
@@ -28,13 +41,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// Handler
-	h := NewHandler(db)
-	// Routes
-	router := NewRouter(h)
-
-	log.Printf("starting server on %s", listen)
-	log.Fatal(http.ListenAndServe(listen, router))
+	return db
 }

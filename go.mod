@@ -2,6 +2,7 @@ module backend/core
 
 require (
 	github.com/golang/protobuf v1.1.0 // indirect
+	github.com/google/go-cmp v0.3.1
 	github.com/joho/godotenv v1.3.0
 	github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84
