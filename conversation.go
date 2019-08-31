@@ -374,3 +374,28 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+func (h *Handler) PinConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	conversationID := p.ByName("conversation")
+	userID := r.Context().Value("user").(string)
+
+	// Check relation exists
+	var exists int
+	err := h.db.QueryRow(`SELECT 1 FROM member WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// Update relation
+	_, err = h.db.Exec(`UPDATE "member" SET "pinned" = TRUE WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(200)
+}
