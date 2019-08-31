@@ -17,6 +17,7 @@ func assertDB(t *testing.T, db *sql.DB, query string) {
 	if err != nil {
 		t.Errorf("Error during query %s: %s", query, err)
 	}
+	defer rows.Close()
 	if rows.Next() != true {
 		t.Errorf("Want one result, found none for query %s", query)
 	}

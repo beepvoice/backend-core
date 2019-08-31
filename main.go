@@ -13,12 +13,16 @@ import (
 var listen string
 var postgres string
 
-func main() {
+func init() {
 	// Load .env
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
+
+func main() {
+	listen = os.Getenv("LISTEN")
 
 	// Database
 	db := connect()
@@ -27,7 +31,6 @@ func main() {
 	// Routes
 	router := NewRouter(h)
 
-	listen = os.Getenv("LISTEN")
 	log.Printf("starting server on %s", listen)
 	log.Fatal(http.ListenAndServe(listen, router))
 }

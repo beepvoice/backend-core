@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  pg:
+    image: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=core
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+    ports:
+      - 5432:5432
