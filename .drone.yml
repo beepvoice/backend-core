@@ -4,7 +4,7 @@ steps:
   - name: setup
     image: postgres
     commands:
-      - sleep 15
+      - sleep 5
       - cat postgres/*.sql | psql --host pg --user root --db core
   - name: go
     image: golang:1.12
