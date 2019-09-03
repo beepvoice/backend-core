@@ -12,7 +12,7 @@ func NewRouter(h *Handler) *httprouter.Router {
 	router.GET("/user", h.GetUserByPhone)
 	router.GET("/user/id/:user", h.GetUser)
 	router.GET("/user/username/:username", h.GetUserByUsername)
-	router.PATCH("/user", h.UpdateUser)
+	router.PATCH("/user", AuthMiddleware(h.UpdateUser))
 
 	// Conversations
 	router.POST("/user/conversation", AuthMiddleware(h.CreateConversation))
