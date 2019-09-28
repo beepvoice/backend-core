@@ -1,15 +1,20 @@
 kind: pipeline
 name: tests-integration
 steps:
+  - name: wait
+    image: golang:1.13
+    commands:
+      - go run scripts/testutils.go wait
+    environment:
+      POSTGRES: postgresql://root@pg:5432/core?sslmode=disable
   - name: setup
     image: postgres
     commands:
-      - sleep 5
       - cat postgres/*.sql | psql --host pg --user root --db core
   - name: go
-    image: golang:1.12
+    image: golang:1.13
     commands:
-      - go test -tags=integration
+      - make test_integration
     environment:
       POSTGRES: postgresql://root@pg:5432/core?sslmode=disable
 services:
@@ -33,7 +38,7 @@ steps:
   - name: go
     image: golang:1.12
     commands:
-      - go test -tags=unit
+      - make test_unit
 trigger:
   branch:
     - master
