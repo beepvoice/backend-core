@@ -10,3 +10,5 @@ require (
 	github.com/ttacon/libphonenumber v1.0.0
 	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
 )
+
+go 1.13

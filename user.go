@@ -149,19 +149,6 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httproute
 		return
 	}
 
-	// Check for duplicate username
-	var _id string
-	err = h.db.QueryRow(`
-		SELECT id FROM "user" WHERE "user".id <> $1 AND "user".username = $2
-	`, userID, user.Username).Scan(&_id)
-	if err == nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	} else if err != sql.ErrNoRows {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
 	// Update
 	_, err = h.db.Exec(`
 		UPDATE "user"

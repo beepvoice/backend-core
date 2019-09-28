@@ -28,7 +28,7 @@ func testCreateUser(db *sql.DB, router http.Handler) func(t *testing.T) {
 	return func(t *testing.T) {
 
 		// Setup
-		mockUser := &User{
+		mockUser := User{
 			PhoneNumber: "+65 99999999",
 			FirstName:   "Test",
 			LastName:    "User 1",
@@ -59,7 +59,7 @@ func testGetUserByPhone(db *sql.DB, router http.Handler) func(t *testing.T) {
 	return func(t *testing.T) {
 
 		// Setup
-		mockUser := &User{
+		mockUser := User{
 			PhoneNumber: "+65 99999998",
 			FirstName:   "Test",
 			LastName:    "User 2",
@@ -94,7 +94,7 @@ func testGetUser(db *sql.DB, router http.Handler) func(t *testing.T) {
 	return func(t *testing.T) {
 
 		// Setup
-		mockUser := &User{
+		mockUser := User{
 			PhoneNumber: "+65 99999997",
 			FirstName:   "User",
 			LastName:    "Test 2",
@@ -129,7 +129,7 @@ func testUpdateUser(db *sql.DB, router http.Handler) func(t *testing.T) {
 	return func(t *testing.T) {
 
 		// Setup
-		mockUser := &User{
+		mockUser := User{
 			PhoneNumber: "+65 99999996",
 			FirstName:   "User",
 			LastName:    "Test 3",

@@ -88,7 +88,7 @@ func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprout
 			log.Print(err)
 			return
 		}
-		contacts = append(contacts, User{id, username, bio, profilePic, firstName, lastName, phone})
+		contacts = append(contacts, User{id, &username, bio, profilePic, firstName, lastName, phone})
 	}
 
 	// Respond

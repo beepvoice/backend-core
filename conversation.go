@@ -367,7 +367,7 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 			log.Print(err)
 			return
 		}
-		users = append(users, User{ID: id, Username: username, Bio: bio, ProfilePic: profilePic, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
+		users = append(users, User{ID: id, Username: &username, Bio: bio, ProfilePic: profilePic, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
 	}
 
 	// Respond
