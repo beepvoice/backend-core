@@ -12,10 +12,11 @@ func assertCode(t *testing.T, w *httptest.ResponseRecorder, code int) {
 	}
 }
 
-func assertDB(t *testing.T, db *sql.DB, query string) {
-	rows, err := db.Query(query)
+func assertDB(t *testing.T, db *sql.DB, query string, args ...interface{}) {
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		t.Errorf("Error during query %s: %s", query, err)
+		return
 	}
 	defer rows.Close()
 	if rows.Next() != true {

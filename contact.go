@@ -11,17 +11,17 @@ import (
 func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
 	userID := r.Context().Value("user").(string)
-	contact := PhoneNumber{}
+	contactPhone := PhoneNumber{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&contact)
+	err := decoder.Decode(&contactPhone)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	// Validate
-	phone, err := ParsePhone(contact.PhoneNumber)
-	if err != nil || len(contact.PhoneNumber) < 1 {
+	phone, err := ParsePhone(contactPhone.PhoneNumber)
+	if err != nil || len(contactPhone.PhoneNumber) < 1 {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -30,14 +30,14 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	id := "u-" + RandomHex()
 
 	// Create contact if not exists, returning the id regardless
-	var contactId string
+	contact := User{}
 	err = h.db.QueryRow(`
 		INSERT INTO "user" (id, username, bio, profile_pic, first_name, last_name, phone_number)
 			VALUES ($1, '', '', '', '', '', $2)
 			ON CONFLICT(phone_number)
 			DO UPDATE SET phone_number=EXCLUDED.phone_number
-			RETURNING id
-	`, id, phone).Scan(&contactId)
+			RETURNING id, username, bio, profile_pic, first_name, last_name, phone_number
+	`, id, phone).Scan(&contact.ID, &contact.Username, &contact.Bio, &contact.ProfilePic, &contact.FirstName, &contact.LastName, &contact.PhoneNumber)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
@@ -47,7 +47,7 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 	// Insert
 	_, err = h.db.Exec(`
 		INSERT INTO contact ("user", contact) VALUES ($1, $2)
-	`, userID, contactId)
+	`, userID, contact.ID)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Print(err)
@@ -56,8 +56,8 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 
 	// Respond
 	w.WriteHeader(200)
-	//w.Header().Set("Content-Type", "application/json")
-	//json.NewEncoder(w).Encode(contact)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contact)
 }
 
 func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -82,13 +82,13 @@ func (h *Handler) GetContacts(w http.ResponseWriter, r *http.Request, p httprout
 
 	// Scan
 	for rows.Next() {
-		var id, username, bio, profilePic, firstName, lastName, phone string
-		if err := rows.Scan(&id, &username, &bio, &profilePic, &firstName, &lastName, &phone); err != nil {
+		contact := User{}
+		if err := rows.Scan(&contact.ID, &contact.Username, &contact.Bio, &contact.ProfilePic, &contact.FirstName, &contact.LastName, &contact.PhoneNumber); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		contacts = append(contacts, User{id, &username, bio, profilePic, firstName, lastName, phone})
+		contacts = append(contacts, contact)
 	}
 
 	// Respond

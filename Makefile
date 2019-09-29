@@ -26,6 +26,8 @@ test_integration: test_integration_prepare
 test_integration_prepare:
 	$(GORUN) scripts/testutils.go isrunning || $(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) up -d
 	$(GORUN) scripts/testutils.go wait
+test_integration_sql_shell:
+	$(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) exec pg psql -d core
 test_integration_cleanup:
 	$(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) down
 

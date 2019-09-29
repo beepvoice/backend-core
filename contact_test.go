@@ -9,7 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	// "github.com/google/go-cmp/cmp"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestContact(t *testing.T) {
@@ -21,9 +22,10 @@ func TestContact(t *testing.T) {
 	users := setupUsers(t, db, r)
 
 	t.Run("Create", testCreateContact(db, r, users))
+	t.Run("Get", testGetContacts(db, r, users))
 }
 
-func setupUsers(t *testing.T, db *sql.DB, router http.Handler) {
+func setupUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
 
 	users := []User{
 		User{
@@ -53,8 +55,8 @@ func setupUsers(t *testing.T, db *sql.DB, router http.Handler) {
 		router.ServeHTTP(w, r)
 		assertCode(t, w, 200)
 
-		got := new(User)
-		json.NewDecoder(w.Body).Decode(got)
+		got := User{}
+		json.NewDecoder(w.Body).Decode(&got)
 
 		resultUsers = append(resultUsers, got)
 	}
@@ -63,7 +65,7 @@ func setupUsers(t *testing.T, db *sql.DB, router http.Handler) {
 
 }
 
-func testCreateContact(db *sql.DB, router http.Handler) func(t *testing.T) {
+func testCreateContact(db *sql.DB, router http.Handler, users []User) func(t *testing.T) {
 	return func(t *testing.T) {
 
 		// Setup
@@ -72,24 +74,98 @@ func testCreateContact(db *sql.DB, router http.Handler) func(t *testing.T) {
 			FirstName:   "ContactOwner",
 			LastName:    "User",
 		}
-		b, _ := json.Marshal(mockUser)
+		bs, _ := json.Marshal(mockUser)
+
+		ws := httptest.NewRecorder()
+		rs := httptest.NewRequest("POST", "/user", bytes.NewBuffer(bs))
+		router.ServeHTTP(ws, rs)
+
+		createdUser := new(User)
+		json.NewDecoder(ws.Body).Decode(createdUser)
 
 		// Test
+		b := []byte(`{"phone_number": "` + users[0].PhoneNumber + `"}`)
+
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/user", bytes.NewBuffer(b))
+		r := httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
+		claim, _ := json.Marshal(&RawClient{UserId: createdUser.ID, ClientId: "test"})
+		r.Header.Add("X-User-Claim", string(claim))
 
 		router.ServeHTTP(w, r)
 		assertCode(t, w, 200)
 
 		// Assert
-		got, want := new(User), mockUser
-		wantPhone, _ := ParsePhone(want.PhoneNumber)
-		json.NewDecoder(w.Body).Decode(got)
-		if got.FirstName != want.FirstName || got.LastName != want.LastName || got.PhoneNumber != wantPhone {
-			t.Error("Wanted a User with same FirstName, LastName, PhoneNumber. Got something else")
+		got, want := User{}, users[0]
+		json.NewDecoder(w.Body).Decode(&got)
+		if diff := cmp.Diff(got, want); len(diff) != 0 {
+			t.Error(diff)
 		}
 
-		assertDB(t, db, `SELECT * FROM "user" WHERE phone_number = '+65 9999 9999' AND first_name = 'Test' AND last_name = 'User 1'`)
+		assertDB(t, db, `SELECT * FROM contact WHERE "user" = $1 AND contact = $2`, createdUser.ID, users[0].ID)
+
+	}
+}
+
+func testGetContacts(db *sql.DB, router http.Handler, users []User) func(t *testing.T) {
+	return func(t *testing.T) {
+
+		// Setup
+		mockUser := &User{
+			PhoneNumber: "+65 9999 1002",
+			FirstName:   "ContactOwner",
+			LastName:    "User",
+		}
+		bs, _ := json.Marshal(mockUser)
+
+		ws := httptest.NewRecorder()
+		rs := httptest.NewRequest("POST", "/user", bytes.NewBuffer(bs))
+		router.ServeHTTP(ws, rs)
+
+		createdUser := new(User)
+		json.NewDecoder(ws.Body).Decode(createdUser)
+
+		b := []byte(`{"phone_number": "` + users[0].PhoneNumber + `"}`)
+
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
+		claim, _ := json.Marshal(&RawClient{UserId: createdUser.ID, ClientId: "test"})
+		r.Header.Add("X-User-Claim", string(claim))
+
+		router.ServeHTTP(w, r)
+		assertCode(t, w, 200)
+
+		b = []byte(`{"phone_number": "` + users[1].PhoneNumber + `"}`)
+
+		w = httptest.NewRecorder()
+		r = httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
+		r.Header.Add("X-User-Claim", string(claim))
+
+		router.ServeHTTP(w, r)
+		assertCode(t, w, 200)
+
+		b = []byte(`{"phone_number": "` + users[2].PhoneNumber + `"}`)
+
+		w = httptest.NewRecorder()
+		r = httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
+		r.Header.Add("X-User-Claim", string(claim))
+
+		router.ServeHTTP(w, r)
+		assertCode(t, w, 200)
+
+		// Test
+		w = httptest.NewRecorder()
+		r = httptest.NewRequest("GET", "/user/contact", nil)
+		r.Header.Add("X-User-Claim", string(claim))
+
+		router.ServeHTTP(w, r)
+		assertCode(t, w, 200)
+
+		// Assert
+		got, want := []User{}, users
+		json.NewDecoder(w.Body).Decode(&got)
+		if diff := cmp.Diff(got, want); len(diff) != 0 {
+			t.Error(diff)
+		}
 
 	}
 }
