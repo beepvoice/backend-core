@@ -1,6 +1,6 @@
-FROM golang:1.11-rc-alpine as build
+FROM golang:1.13-rc-alpine as build
 
-RUN apk add --no-cache git=2.18.1-r0
+RUN apk add --no-cache git
 
 WORKDIR /src
 COPY go.mod go.sum .env *.go ./
