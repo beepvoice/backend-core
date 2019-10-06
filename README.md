@@ -41,6 +41,10 @@ Unless otherwise noted, bodies and responses are with `Content-Type: application
 | [Get Conversation Members](#Get-Conversation-Members) |
 | [Create Contact](#Create-Contact) |
 | [Get Contacts](#Get-Contacts) |
+| [Subscribe Contact](#Subscribe-Contact) |
+| [Subscribe Conversation](#Subscribe-Conversation) |
+| [Subscribe User](#Subscribe-User) |
+| [Subscribe Member](#Subscribe-Member) |
 
 ---
 
@@ -573,3 +577,123 @@ List of user objects in user's contacts.
 | ---- | ----------- |
 | 400 | Invalid `X-User-Claim` header. |
 | 500 | Error occurred retrieving entries from the database. |
+
+---
+
+### Subscribe Contact
+
+```
+GET /user/subscribe/contact
+```
+
+Subscribe to an Eventsource stream giving update in changes in state of the contacts database.
+
+#### Success (200 OK)
+
+An Eventsource stream. Each event (stringified json) will be of the following format:
+
+```json
+{
+  "type": "<add|update>",
+  "data": {
+    "usera": "<user id>",
+    "userb": "<user id>"
+  }
+}
+```
+
+The json in the data field is also stringified.
+
+---
+
+### Subscribe Conversation
+
+```
+GET /user/subscribe/conversation
+```
+
+Subscribe to an Eventsource stream giving update in changes in state of the conversations database.
+
+#### Success (200 OK)
+
+An Eventsource stream. Each event (stringified json) will be of the following format:
+
+```json
+{
+  "type": "<add|update|delete>",
+  "data": {
+    "id": "<conversation id>",
+    "title": "<string>",
+    "dm": "<bool>",
+    "picture": "<string>",
+    "pinned": "<bool>"
+  }
+}
+```
+
+The json in the data field is also stringified.
+
+---
+
+### Subscribe User
+
+```
+GET /user/subscribe/user
+```
+
+Subscribe to an Eventsource stream giving update in changes in state of the users database.
+
+#### Success (200 OK)
+
+An Eventsource stream. Each event (stringified json) will be of the following format:
+
+```json
+{
+  "type": "<add|update>",
+  "data": {
+    "id": "<user id>",
+    "username": "<string>",
+    "bio": "<string>",
+    "profile_pic": "<string>",
+    "last_name": "<string>",
+    "phone_number": "<string>"
+  }
+}
+```
+
+The json in the data field is also stringified.
+
+---
+
+### Subscribe Member
+
+```
+GET /user/subscribe/conversation/:conversation/member
+```
+
+Subscribe to an Eventsource stream giving update in changes in state of the conversation members database.
+
+#### URL Params
+
+| Name | Type | Description | Required |
+| ---- | ---- | ----------- | -------- |
+| conversation | String | Conversation's ID. | ✓ |
+
+#### Success (200 OK)
+
+An Eventsource stream. Each event (stringified json) will be of the following format:
+
+```json
+{
+  "type": "<add|update>",
+  "data": {
+    "user": "<user id>",
+    "conversation": "<conversation id>",
+    "pinned": "<bool>"
+  }
+}
+```
+
+The json in the data field is also stringified.
+
+---

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+  "github.com/nats-io/go-nats"
 	_ "github.com/lib/pq"
 )
 
@@ -26,8 +27,10 @@ func main() {
 
 	// Database
 	db := connect()
+  // NATs
+  nc := connectNats()
 	// Handler
-	h := NewHandler(db)
+	h := NewHandler(db, nc)
 	// Routes
 	router := NewRouter(h)
 
@@ -50,4 +53,18 @@ func connect() *sql.DB {
 	}
 
 	return db
+}
+
+func connectNats() *nats.Conn {
+  natsHost := os.Getenv("NATS")
+  var nc *nats.Conn
+  var err error
+  if natsHost != "" {
+    log.Printf("connecting to nats %s", natsHost)
+    nc, err = nats.Connect(natsHost)
+    if err != nil {
+      log.Fatal(err)
+    }
+  }
+  return nc
 }

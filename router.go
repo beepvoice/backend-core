@@ -38,5 +38,11 @@ func NewRouter(h *Handler) *httprouter.Router {
 	//router.DELETE("/user/:user/contact/:contact", h.DeleteContact)
 	//router.GET("/user/:user/contact/:contact/conversation/", h.GetContactConversations)
 
+  // Subscribe
+  router.GET("/user/subscribe/contact", AuthMiddleware(h.SubscribeContact))
+  router.GET("/user/subscribe/conversation", AuthMiddleware(h.SubscribeConversation))
+  router.GET("/user/subscribe", AuthMiddleware(h.SubscribeUser))
+  router.GET("/user/subscribe/conversation/:conversation/member", AuthMiddleware(h.SubscribeMember))
+
 	return router
 }

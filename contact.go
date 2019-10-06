@@ -54,6 +54,25 @@ func (h *Handler) CreateContact(w http.ResponseWriter, r *http.Request, p httpro
 		return
 	}
 
+  // Publish NATs
+  if h.nc != nil {
+    contact := Contact {
+      UserA: userID,
+      UserB: contact.ID,
+    }
+    contactString, err := json.Marshal(&contact)
+    if err == nil {
+      updateMsg := UpdateMsg {
+        Type: "add",
+        Data: string(contactString),
+      }
+      updateMsgString, err := json.Marshal(&updateMsg)
+      if err == nil {
+        h.nc.Publish("contact", updateMsgString)
+      }
+    }
+  }
+
 	// Respond
 	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json")
