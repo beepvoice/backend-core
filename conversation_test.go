@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"gopkg.in/guregu/null.v3"
 )
 
 func TestConversation(t *testing.T) {
@@ -19,13 +20,13 @@ func TestConversation(t *testing.T) {
 	h := NewHandler(db, nil)
 	r := NewRouter(h)
 
-	users := setupUsers(t, db, r)
+	users := setupConversationUsers(t, db, r)
 
 	t.Run("Create", testCreateConversation(db, r, users))
 	t.Run("Get", testGetConversations(db, r, users))
 }
 
-func setupUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
+func setupConversationUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
 
 	users := []User{
 		User{
@@ -68,31 +69,30 @@ func setupUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
 func testCreateConversation(db *sql.DB, router http.Handler, users []User) func(t *testing.T) {
 	return func(t *testing.T) {
 
-		// Setup
-
 		// Test
 		mockConversation := &Conversation{
-			Title: "Test Conversation 1",
-			DM:    true,
+			Title: null.StringFrom("Test Conversation 1"),
+			DM:    false,
 		}
 		b, _ := json.Marshal(mockConversation)
 
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("POST", "/user/conversation", bytes.NewBuffer(b))
-		claim, _ := json.Marshal(&RawClient{UserId: createdUser.ID, ClientId: "test"})
+		claim, _ := json.Marshal(&RawClient{UserId: users[0].ID, ClientId: "test"})
 		r.Header.Add("X-User-Claim", string(claim))
 
 		router.ServeHTTP(w, r)
 		assertCode(t, w, 200)
 
 		// Assert
-		got, want := User{}, users[0]
+		got, want := &Conversation{}, mockConversation
 		json.NewDecoder(w.Body).Decode(&got)
-		if diff := cmp.Diff(got, want); len(diff) != 0 {
-			t.Error(diff)
+		if got.DM != want.DM || got.Title.String != want.Title.String {
+			t.Error("Wanted a Conversation with same Title, DM. Got something else")
 		}
 
-		assertDB(t, db, `SELECT * FROM contact WHERE "user" = $1 AND contact = $2`, createdUser.ID, users[0].ID)
+		assertDB(t, db, `SELECT * FROM "conversation" WHERE title = $1 AND dm = $2`, mockConversation.Title, mockConversation.DM)
+		assertDB(t, db, `SELECT * FROM member WHERE "user" = $1 AND "conversation" = $2`, users[0].ID, got.ID)
 
 	}
 }
@@ -101,59 +101,34 @@ func testGetConversations(db *sql.DB, router http.Handler, users []User) func(t 
 	return func(t *testing.T) {
 
 		// Setup
-		mockUser := &User{
-			PhoneNumber: "+65 9999 1002",
-			FirstName:   "ConversationOwner",
-			LastName:    "User",
+		mockConversation := &Conversation{
+			Title: null.StringFrom("Test Conversation 2"),
+			DM:    false,
 		}
-		bs, _ := json.Marshal(mockUser)
+		bs, _ := json.Marshal(mockConversation)
 
 		ws := httptest.NewRecorder()
-		rs := httptest.NewRequest("POST", "/user", bytes.NewBuffer(bs))
+		rs := httptest.NewRequest("POST", "/user/conversation", bytes.NewBuffer(bs))
+		claims, _ := json.Marshal(&RawClient{UserId: users[1].ID, ClientId: "test"})
+		rs.Header.Add("X-User-Claim", string(claims))
+
 		router.ServeHTTP(ws, rs)
-
-		createdUser := new(User)
-		json.NewDecoder(ws.Body).Decode(createdUser)
-
-		b := []byte(`{"phone_number": "` + users[0].PhoneNumber + `"}`)
-
-		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
-		claim, _ := json.Marshal(&RawClient{UserId: createdUser.ID, ClientId: "test"})
-		r.Header.Add("X-User-Claim", string(claim))
-
-		router.ServeHTTP(w, r)
-		assertCode(t, w, 200)
-
-		b = []byte(`{"phone_number": "` + users[1].PhoneNumber + `"}`)
-
-		w = httptest.NewRecorder()
-		r = httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
-		r.Header.Add("X-User-Claim", string(claim))
-
-		router.ServeHTTP(w, r)
-		assertCode(t, w, 200)
-
-		b = []byte(`{"phone_number": "` + users[2].PhoneNumber + `"}`)
-
-		w = httptest.NewRecorder()
-		r = httptest.NewRequest("POST", "/user/contact", bytes.NewBuffer(b))
-		r.Header.Add("X-User-Claim", string(claim))
-
-		router.ServeHTTP(w, r)
-		assertCode(t, w, 200)
+		assertCode(t, ws, 200)
 
 		// Test
-		w = httptest.NewRecorder()
-		r = httptest.NewRequest("GET", "/user/contact", nil)
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/user/conversation", nil)
+		claim, _ := json.Marshal(&RawClient{UserId: users[1].ID, ClientId: "test"})
 		r.Header.Add("X-User-Claim", string(claim))
 
 		router.ServeHTTP(w, r)
 		assertCode(t, w, 200)
+		conversations := make([]Conversation, 1)
+		json.NewDecoder(w.Body).Decode(&conversations)
 
 		// Assert
-		got, want := []User{}, users
-		json.NewDecoder(w.Body).Decode(&got)
+		got, want := conversations[0], Conversation{}
+		json.NewDecoder(ws.Body).Decode(&want)
 		if diff := cmp.Diff(got, want); len(diff) != 0 {
 			t.Error(diff)
 		}

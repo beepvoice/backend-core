@@ -104,13 +104,13 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Scan
 	for rows.Next() {
-		var id, title, picture string
-		if err := rows.Scan(&id, &title, &picture); err != nil {
+		conversation := Conversation{}
+		if err := rows.Scan(&conversation.ID, &conversation.Title, &conversation.Picture, &conversation.Pinned); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		conversations = append(conversations, Conversation{ID: id, Title: title, DM: false, Picture: picture})
+		conversations = append(conversations, conversation)
 	}
 
 	// Respond
@@ -136,7 +136,7 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
     member.pinned
     FROM "conversation", member
     WHERE member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
-	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture)
+	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture, &conversation.Pinned)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -183,7 +183,7 @@ func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p h
 	}
 
 	// Update
-	if len(conversation.Title) > 0 {
+	if conversation.Title.Valid {
 		_, err = h.db.Exec(`
 			UPDATE "conversation"
 			SET title = $2, picture = $3
@@ -429,13 +429,13 @@ func (h *Handler) GetConversationMembers(w http.ResponseWriter, r *http.Request,
 
 	// Scan
 	for rows.Next() {
-		var id, username, bio, profilePic, firstName, lastName, phoneNumber string
-		if err := rows.Scan(&id, &username, &bio, &profilePic, &firstName, &lastName, &phoneNumber); err != nil {
+		user := User{}
+		if err := rows.Scan(&user.ID, &user.Username, &user.Bio, &user.ProfilePic, &user.FirstName, &user.LastName, &user.PhoneNumber); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			log.Print(err)
 			return
 		}
-		users = append(users, User{ID: id, Username: &username, Bio: bio, ProfilePic: profilePic, FirstName: firstName, LastName: lastName, PhoneNumber: phoneNumber})
+		users = append(users, user)
 	}
 
 	// Respond

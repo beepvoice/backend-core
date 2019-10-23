@@ -19,13 +19,13 @@ func TestContact(t *testing.T) {
 	h := NewHandler(db, nil)
 	r := NewRouter(h)
 
-	users := setupUsers(t, db, r)
+	users := setupContactUsers(t, db, r)
 
 	t.Run("Create", testCreateContact(db, r, users))
 	t.Run("Get", testGetContacts(db, r, users))
 }
 
-func setupUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
+func setupContactUsers(t *testing.T, db *sql.DB, router http.Handler) []User {
 
 	users := []User{
 		User{
