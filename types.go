@@ -3,19 +3,19 @@ package main
 // String pointer means nullable
 
 type UpdateMsg struct {
-  Type    string `json:"type"`
-  Data    string `json:"data"`
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
 
 type Contact struct {
-  UserA   string `json:"usera"`   // First user ID
-  UserB   string `json:"userb"`   // Second user ID
+	UserA string `json:"usera"` // First user ID
+	UserB string `json:"userb"` // Second user ID
 }
 
 type Member struct {
-  User          string  `json:"user"`
-  Conversation  string  `json:"conversation"`
-  Pinned        bool    `json:"pinned"`
+	User         string `json:"user"`
+	Conversation string `json:"conversation"`
+	Pinned       bool   `json:"pinned"`
 }
 
 type Conversation struct {

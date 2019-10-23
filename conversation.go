@@ -57,20 +57,20 @@ func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p h
 		return
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    conversationString, err := json.Marshal(&conversation)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "add",
-        Data: string(conversationString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("conversation", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		conversationString, err := json.Marshal(&conversation)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "add",
+				Data: string(conversationString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("conversation", updateMsgString)
+			}
+		}
+	}
 
 	// Respond
 	w.Header().Set("Content-Type", "application/json")
@@ -196,20 +196,20 @@ func (h *Handler) UpdateConversation(w http.ResponseWriter, r *http.Request, p h
 		}
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    conversationString, err := json.Marshal(&conversation)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "update",
-        Data: string(conversationString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("conversation", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		conversationString, err := json.Marshal(&conversation)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "update",
+				Data: string(conversationString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("conversation", updateMsgString)
+			}
+		}
+	}
 
 	w.WriteHeader(200)
 }
@@ -266,23 +266,23 @@ func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p h
 		return
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    conversation := Conversation {
-      ID: conversationID,
-    }
-    conversationString, err := json.Marshal(&conversation)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "delete",
-        Data: string(conversationString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("conversation", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		conversation := Conversation{
+			ID: conversationID,
+		}
+		conversationString, err := json.Marshal(&conversation)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "delete",
+				Data: string(conversationString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("conversation", updateMsgString)
+			}
+		}
+	}
 
 	w.WriteHeader(200)
 }
@@ -378,25 +378,25 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    member := Member {
-      User: member.ID,
-      Conversation: conversationID,
-      Pinned: false, // default
-    }
-    memberString, err := json.Marshal(&member)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "add",
-        Data: string(memberString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("member", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		member := Member{
+			User:         member.ID,
+			Conversation: conversationID,
+			Pinned:       false, // default
+		}
+		memberString, err := json.Marshal(&member)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "add",
+				Data: string(memberString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("member", updateMsgString)
+			}
+		}
+	}
 
 	// Respond
 	//w.Header().Set("Content-Type", "application/json")
@@ -465,25 +465,25 @@ func (h *Handler) PinConversation(w http.ResponseWriter, r *http.Request, p http
 		return
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    member := Member {
-      User: userID,
-      Conversation: conversationID,
-      Pinned: true,
-    }
-    memberString, err := json.Marshal(&member)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "update",
-        Data: string(memberString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("member", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		member := Member{
+			User:         userID,
+			Conversation: conversationID,
+			Pinned:       true,
+		}
+		memberString, err := json.Marshal(&member)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "update",
+				Data: string(memberString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("member", updateMsgString)
+			}
+		}
+	}
 
 	w.WriteHeader(200)
 }

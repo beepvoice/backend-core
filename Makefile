@@ -3,6 +3,7 @@ GORUN=$(GOCMD) run
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
+GOFMT_PROG=gofmt
 DOCKERCOMPOSE=docker-compose
 
 
@@ -17,6 +18,9 @@ build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 
 test: test_unit test_integration
+
+test_fmt:
+	$(GOFMT_PROG) -l .
 
 test_unit:
 	$(GOTEST) -tags=unit -v -cover

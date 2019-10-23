@@ -50,20 +50,20 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request, _ httproute
 	}
 	user.ID = finalId
 
-  // Publish NATs
-  if h.nc != nil {
-    userString, err := json.Marshal(&user)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "add",
-        Data: string(userString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("user", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		userString, err := json.Marshal(&user)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "add",
+				Data: string(userString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("user", updateMsgString)
+			}
+		}
+	}
 
 	// Respond
 	w.Header().Set("Content-Type", "application/json")
@@ -181,20 +181,20 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request, p httproute
 		return
 	}
 
-  // Publish NATs
-  if h.nc != nil {
-    userString, err := json.Marshal(&user)
-    if err == nil {
-      updateMsg := UpdateMsg {
-        Type: "update",
-        Data: string(userString),
-      }
-      updateMsgString, err := json.Marshal(&updateMsg)
-      if err == nil {
-        h.nc.Publish("user", updateMsgString)
-      }
-    }
-  }
+	// Publish NATs
+	if h.nc != nil {
+		userString, err := json.Marshal(&user)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "update",
+				Data: string(userString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("user", updateMsgString)
+			}
+		}
+	}
 
 	w.WriteHeader(200)
 }

@@ -1,4 +1,19 @@
 kind: pipeline
+name: tests-fmt
+steps:
+  - name: go
+    image: golang:1.13
+    commands:
+      - make test_fmt
+trigger:
+  branch:
+    - master
+    - develop
+  event:
+    - push
+    - pull_request
+---
+kind: pipeline
 name: tests-integration
 steps:
   - name: wait
@@ -36,7 +51,7 @@ kind: pipeline
 name: tests-unit
 steps:
   - name: go
-    image: golang:1.12
+    image: golang:1.13
     commands:
       - make test_unit
 trigger:
