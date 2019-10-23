@@ -1,23 +1,40 @@
-GOCMD=go
-GORUN=$(GOCMD) run
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
-GOFMT_PROG=gofmt
-DOCKERCOMPOSE=docker-compose
+# See https://git.makerforce.io/beep/best-practices/wiki/Makefile
 
 
+#
+# Programs
+#
+GOCMD?=go
+GORUN?=$(GOCMD) run
+GOBUILD?=$(GOCMD) build
+GOCLEAN?=$(GOCMD) clean
+GOTEST?=$(GOCMD) test
+GOFMT_PROG?=gofmt
+DOCKERCOMPOSE?=docker-compose
+
+#
+# Local
+#
 BINARY_NAME=core
 
-DOCKERCOMPOSE_INTEGRATION_CONFIG=docker-compose.integration.yml
+#
+# Files
+#
+DOCKERCOMPOSE_INTEGRATION_CONFIG?=docker-compose.integration.yml
 
 
-all: test_unit build
+#
+# Tasks
+#
+
+
+# Let's do a quick unit test and then build backend-core
+all: test_fmt test_unit build
 
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
 
-test: test_unit test_integration
+test: test_fmt test_unit test_integration
 
 test_fmt:
 	$(GOFMT_PROG) -l .
