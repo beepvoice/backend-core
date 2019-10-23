@@ -16,7 +16,7 @@ import (
 func TestContact(t *testing.T) {
 	db := connect()
 	defer db.Close()
-	h := NewHandler(db)
+	h := NewHandler(db, nil)
 	r := NewRouter(h)
 
 	users := setupUsers(t, db, r)

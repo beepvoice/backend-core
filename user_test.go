@@ -16,7 +16,7 @@ import (
 func TestUser(t *testing.T) {
 	db := connect()
 	defer db.Close()
-	h := NewHandler(db)
+	h := NewHandler(db, nil)
 	r := NewRouter(h)
 
 	t.Run("Create", testCreateUser(db, r))
