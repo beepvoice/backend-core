@@ -72,7 +72,6 @@ func testCreateConversation(db *sql.DB, router http.Handler, users []User) func(
 		// Test
 		mockConversation := &Conversation{
 			Title: null.StringFrom("Test Conversation 1"),
-			DM:    false,
 		}
 		b, _ := json.Marshal(mockConversation)
 
@@ -87,11 +86,11 @@ func testCreateConversation(db *sql.DB, router http.Handler, users []User) func(
 		// Assert
 		got, want := &Conversation{}, mockConversation
 		json.NewDecoder(w.Body).Decode(&got)
-		if got.DM != want.DM || got.Title.String != want.Title.String {
-			t.Error("Wanted a Conversation with same Title, DM. Got something else")
+		if got.Title.String != want.Title.String {
+			t.Error("Wanted a Conversation with same Title. Got something else")
 		}
 
-		assertDB(t, db, `SELECT * FROM "conversation" WHERE title = $1 AND dm = $2`, mockConversation.Title, mockConversation.DM)
+		assertDB(t, db, `SELECT * FROM "conversation" WHERE title = $1`, mockConversation.Title)
 		assertDB(t, db, `SELECT * FROM member WHERE "user" = $1 AND "conversation" = $2`, users[0].ID, got.ID)
 
 	}
@@ -103,7 +102,6 @@ func testGetConversations(db *sql.DB, router http.Handler, users []User) func(t 
 		// Setup
 		mockConversation := &Conversation{
 			Title: null.StringFrom("Test Conversation 2"),
-			DM:    false,
 		}
 		bs, _ := json.Marshal(mockConversation)
 

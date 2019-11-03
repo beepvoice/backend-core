@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 CREATE TABLE IF NOT EXISTS "conversation" (
 	id BYTEA PRIMARY KEY,
-	dm BOOLEAN,
 	title VARCHAR(65535),
 	picture VARCHAR(63535)
 );
