@@ -23,6 +23,7 @@ func NewRouter(h *Handler) *httprouter.Router {
 	router.PATCH("/user/conversation/:conversation", AuthMiddleware(h.UpdateConversation)) // USER MEMBER CONVERSATION ADMIN=true -> update conversation title
 	//router.DELETE("/user/:user/conversation/:conversation", h.DeleteConversation) // USER MEMBER CONVERSATION -> delete membership
 	router.POST("/user/conversation/:conversation/pin", AuthMiddleware(h.PinConversation))
+	router.DELETE("/user/conversation/:conversation/pin", AuthMiddleware(h.UnpinConversation))
 	router.POST("/user/conversation/:conversation/member", AuthMiddleware(h.CreateConversationMember)) // USER MEMBER CONVERSATION ADMIN=true -> create new membership
 	router.GET("/user/conversation/:conversation/member", AuthMiddleware(h.GetConversationMembers))    // USER MEMBER CONVERSATION
 	//router.DELETE("/user/:user/conversation/:conversation/member/:member", h.DeleteConversationMember) // USER MEMBER CONVERSATION ADMIN=true -> delete membership

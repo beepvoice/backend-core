@@ -487,3 +487,48 @@ func (h *Handler) PinConversation(w http.ResponseWriter, r *http.Request, p http
 
 	w.WriteHeader(200)
 }
+
+func (h *Handler) UnpinConversation(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	conversationID := p.ByName("conversation")
+	userID := r.Context().Value("user").(string)
+
+	// Check relation exists
+	var exists int
+	err := h.db.QueryRow(`SELECT 1 FROM member WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// Update relation
+	_, err = h.db.Exec(`UPDATE "member" SET "pinned" = FALSE WHERE "user" = $1 AND "conversation" = $2`, userID, conversationID)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// Publish NATs
+	if h.nc != nil {
+		member := Member{
+			User:         userID,
+			Conversation: conversationID,
+			Pinned:       false,
+		}
+		memberString, err := json.Marshal(&member)
+		if err == nil {
+			updateMsg := UpdateMsg{
+				Type: "update",
+				Data: string(memberString),
+			}
+			updateMsgString, err := json.Marshal(&updateMsg)
+			if err == nil {
+				h.nc.Publish("member", updateMsgString)
+			}
+		}
+	}
+
+	w.WriteHeader(200)
+}

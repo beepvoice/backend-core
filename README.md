@@ -25,26 +25,28 @@ Supply environment variables by either exporting them or editing ```.env```.
 
 Unless otherwise noted, bodies and responses are with `Content-Type: application/json`. Endpoints marked with a ```*``` require a populated `X-User-Claim` header from `backend-auth`.
 
-| Contents |
-| -------- |
-| [Create User](#Create-User) |
-| [Get Users by Phone](#Get-Users-by-Phone) |
-| [Get User by ID](#Get-User-by-ID) |
-| [Get User by Username](#Get-User-by-Username) ]
-| [Update User](#Update-User) |
-| [Create Conversation](#Create-Conversation) |
-| [Delete Conversation](#Delete-Conversation) |
-| [Update Conversation](#Update-Conversation) |
-| [Get Conversations](#Get-Conversations) |
-| [Get Conversation](#Get-Conversation) |
+| Contents                                                  |
+| --------------------------------------------------------- |
+| [Create User](#Create-User)                               |
+| [Get Users by Phone](#Get-Users-by-Phone)                 |
+| [Get User by ID](#Get-User-by-ID)                         |
+| [Get User by Username](#Get-User-by-Username)             |
+| [Update User](#Update-User)                               |
+| [Create Conversation](#Create-Conversation)               |
+| [Delete Conversation](#Delete-Conversation)               |
+| [Update Conversation](#Update-Conversation)               |
+| [Get Conversations](#Get-Conversations)                   |
+| [Get Conversation](#Get-Conversation)                     |
+| [Pin Conversation](#Pin-Conversation)                     |
+| [Unpin Conversation](#Unpin-Conversation)                 |
 | [Create Conversation Member](#Create-Conversation-Member) |
-| [Get Conversation Members](#Get-Conversation-Members) |
-| [Create Contact](#Create-Contact) |
-| [Get Contacts](#Get-Contacts) |
-| [Subscribe Contact](#Subscribe-Contact) |
-| [Subscribe Conversation](#Subscribe-Conversation) |
-| [Subscribe User](#Subscribe-User) |
-| [Subscribe Member](#Subscribe-Member) |
+| [Get Conversation Members](#Get-Conversation-Members)     |
+| [Create Contact](#Create-Contact)                         |
+| [Get Contacts](#Get-Contacts)                             |
+| [Subscribe Contact](#Subscribe-Contact)                   |
+| [Subscribe Conversation](#Subscribe-Conversation)         |
+| [Subscribe User](#Subscribe-User)                         |
+| [Subscribe Member](#Subscribe-Member)                     |
 
 ---
 
@@ -442,6 +444,33 @@ Blank body.
 
 ---
 
+### Unpin Conversation
+
+```
+DELETE /user/conversation/:conversation/pin
+```
+
+Unmark the specified conversation as pinned.
+
+#### URL Params
+
+| Name | Type | Description | Required |
+| ---- | ---- | ----------- | -------- |
+| conversation | String | Conversation's ID. | ✓ |
+
+#### Success Response (200 OK)
+
+Blank body.
+
+#### Errors
+
+| Code | Description |
+| ---- | ----------- |
+| 400 | Invalid `X-User-Claim` header. |
+| 404 | Conversation with supplied ID could not be found in database. |
+| 500 | Error occurred editing entry in the database. |
+
+---
 ### Create Conversation Member*
 
 ```
