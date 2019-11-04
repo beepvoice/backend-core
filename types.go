@@ -21,7 +21,6 @@ type Member struct {
 type Conversation struct {
 	ID      string      `json:"id"`      // id
 	Title   null.String `json:"title"`   // title
-	DM      bool        `json:"dm"`      // dm
 	Picture null.String `json:"picture"` // picture
 	Pinned  bool        `json:"pinned"`  // pinned
 }

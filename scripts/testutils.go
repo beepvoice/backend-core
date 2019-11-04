@@ -47,7 +47,7 @@ func isrunning() int {
 }
 
 func wait() int {
-	for i := 0; i < 60; i += 1 {
+	for i := 0; i < 120; i += 1 {
 		timer := time.NewTimer(1 * time.Second)
 		if isrunning() == 0 {
 			return 0

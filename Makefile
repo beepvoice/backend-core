@@ -45,7 +45,7 @@ test_unit:
 test_integration: test_integration_prepare
 	$(GOTEST) -tags=integration -v -cover
 test_integration_prepare:
-	$(GORUN) scripts/testutils.go isrunning || $(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) up -d
+	$(GORUN) scripts/testutils.go isrunning || ($(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) up -d && echo "$(shell tput bold)NOTE: Started some containers, cleanup with 'make test_integration_cleanup'$(shell tput sgr0)")
 	$(GORUN) scripts/testutils.go wait
 test_integration_sql_shell:
 	$(DOCKERCOMPOSE) -f $(DOCKERCOMPOSE_INTEGRATION_CONFIG) exec pg psql -d core

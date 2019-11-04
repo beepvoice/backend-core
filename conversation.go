@@ -37,8 +37,8 @@ func (h *Handler) CreateConversation(w http.ResponseWriter, r *http.Request, p h
 
 	// Conversation
 	_, err1 := tx.Exec(`
-		INSERT INTO "conversation" (id, title, dm, picture) VALUES ($1, $2, $3, $4)
-	`, conversation.ID, conversation.Title, conversation.DM, conversation.Picture)
+		INSERT INTO "conversation" (id, title, picture) VALUES ($1, $2, $3)
+	`, conversation.ID, conversation.Title, conversation.Picture)
 	// First member
 	_, err2 := tx.Exec(`
 		INSERT INTO member ("user", "conversation") VALUES ($1, $2)
@@ -86,14 +86,9 @@ func (h *Handler) GetConversations(w http.ResponseWriter, r *http.Request, p htt
 
 	// Select
 	rows, err := h.db.Query(`
-		SELECT "conversation".id, CASE
-      WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-      ELSE title
-    END AS title,
-    "conversation".picture,
-    member.pinned
-    FROM "conversation", member
-    WHERE member.conversation = "conversation".id AND member.user = $1
+		SELECT "conversation".id, "conversation".title, "conversation".picture, member.pinned
+		FROM "conversation", member
+		WHERE member.conversation = "conversation".id AND member.user = $1
 	`, userID)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -128,14 +123,9 @@ func (h *Handler) GetConversation(w http.ResponseWriter, r *http.Request, p http
 
 	// Select
 	err := h.db.QueryRow(`
-		SELECT "conversation".id, CASE
-    WHEN "conversation".dm THEN (SELECT CONCAT("user".first_name, ' ', "user".last_name) FROM "user", member WHERE "user".id <> $1 AND "user".id = member.user AND member.conversation = "conversation".id)
-      ELSE title
-    END AS title,
-    "conversation" picture,
-    member.pinned
-    FROM "conversation", member
-    WHERE member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
+		SELECT "conversation".id, "conversation".title, "conversation".picture, member.pinned
+		FROM "conversation", member
+		WHERE member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
 	`, userID, conversationID).Scan(&conversation.ID, &conversation.Title, &conversation.Picture, &conversation.Pinned)
 
 	switch {
@@ -289,7 +279,9 @@ func (h *Handler) DeleteConversation(w http.ResponseWriter, r *http.Request, p h
 
 func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	// Parse
-	userID := r.Context().Value("user").(string)
+	// We don't need the user ID here because when we first create a conversation, it should have no members
+	// TODO: conversations should have conversation owners?
+	//userID := r.Context().Value("user").(string)
 	conversationID := p.ByName("conversation")
 	member := User{}
 	decoder := json.NewDecoder(r.Body)
@@ -308,65 +300,7 @@ func (h *Handler) CreateConversationMember(w http.ResponseWriter, r *http.Reques
 	// Log
 	log.Print(member)
 
-	// Check for existing DM
-	var dmID string
-	err = h.db.QueryRow(`
-    SELECT "conversation".id FROM "conversation", "member"
-    WHERE
-      "conversation".dm = TRUE
-      AND "conversation".id = "member".conversation
-      AND "member".user = $1
-  `, member.ID).Scan(&dmID)
-	if err != sql.ErrNoRows {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	} else if err == nil {
-		w.Write([]byte(dmID))
-		return
-	}
-
-	// Check for valid conversation and prevent duplicate entries
-	var test string
-	err = h.db.QueryRow(`
-    SELECT "conversation".id FROM "conversation", "member"
-    WHERE
-      "conversation".id = $1
-      AND (
-        "conversation".dm = FALSE
-        OR (SELECT
-          COUNT("member".user)
-          FROM "member"
-          WHERE "member".conversation = $1)
-        <= 2)
-      AND "member".conversation = "conversation".id
-      AND "member".user <> $2
-  `, conversationID, member.ID).Scan(&test)
-	switch {
-	case err == sql.ErrNoRows:
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	case err != nil:
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		log.Print(err)
-		return
-	}
-
-	// Check user adding the user is in conversation
-	var conversationID2 string
-	err = h.db.QueryRow(`
-		SELECT id FROM "conversation"
-		INNER JOIN member
-		ON member.conversation = "conversation".id AND member.user = $1 AND member.conversation = $2
-	`, userID, conversationID).Scan(&conversationID2)
-	switch {
-	case err == sql.ErrNoRows:
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	case err != nil:
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		log.Print(err)
-		return
-	}
+	// TODO: When we need stronger constraints, add some policy around existing conversations with a title set
 
 	// Insert
 	_, err = h.db.Exec(`
